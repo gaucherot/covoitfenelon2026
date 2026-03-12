@@ -441,10 +441,49 @@
 
 <div class="app-header">
   <div style="display:flex;align-items:center;gap:10px;">
-    <div style="font-size:32px;line-height:1;">🚐</div>
+    <div style="width:52px;height:52px;flex-shrink:0;">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+        <!-- carrosserie -->
+        <rect x="4" y="28" width="56" height="22" rx="5" fill="#a78bfa"/>
+        <!-- toit arrondi -->
+        <path d="M10 28 Q12 14 28 13 L44 13 Q54 13 54 28Z" fill="#7c3aed"/>
+        <!-- vitres toit -->
+        <rect x="14" y="16" width="10" height="10" rx="2" fill="#bfdbfe" opacity="0.9"/>
+        <rect x="27" y="16" width="10" height="10" rx="2" fill="#bfdbfe" opacity="0.9"/>
+        <rect x="40" y="16" width="10" height="10" rx="2" fill="#bfdbfe" opacity="0.9"/>
+        <!-- pare-brise -->
+        <rect x="5" y="28" width="14" height="10" rx="2" fill="#bfdbfe" opacity="0.85"/>
+        <!-- phares -->
+        <circle cx="8" cy="44" r="3" fill="#fde68a"/>
+        <circle cx="56" cy="44" r="3" fill="#fde68a"/>
+        <!-- roues -->
+        <circle cx="16" cy="51" r="7" fill="#1e1b4b"/>
+        <circle cx="16" cy="51" r="3.5" fill="#6d28d9"/>
+        <circle cx="48" cy="51" r="7" fill="#1e1b4b"/>
+        <circle cx="48" cy="51" r="3.5" fill="#6d28d9"/>
+        <!-- enfants visages -->
+        <circle cx="22" cy="22" r="4" fill="#fcd34d"/>
+        <circle cx="34" cy="22" r="4" fill="#fca5a5"/>
+        <circle cx="46" cy="22" r="4" fill="#86efac"/>
+        <!-- yeux -->
+        <circle cx="21" cy="21" r="0.8" fill="#1e1b4b"/>
+        <circle cx="23" cy="21" r="0.8" fill="#1e1b4b"/>
+        <circle cx="33" cy="21" r="0.8" fill="#1e1b4b"/>
+        <circle cx="35" cy="21" r="0.8" fill="#1e1b4b"/>
+        <circle cx="45" cy="21" r="0.8" fill="#1e1b4b"/>
+        <circle cx="47" cy="21" r="0.8" fill="#1e1b4b"/>
+        <!-- sourires -->
+        <path d="M20 23.5 Q22 25 24 23.5" stroke="#1e1b4b" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        <path d="M32 23.5 Q34 25 36 23.5" stroke="#1e1b4b" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        <path d="M44 23.5 Q46 25 48 23.5" stroke="#1e1b4b" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        <!-- étoiles déco -->
+        <text x="2" y="12" font-size="7">⭐</text>
+        <text x="54" y="12" font-size="7">⭐</text>
+      </svg>
+    </div>
     <div>
       <div class="app-title">Covoiturage Fénelon</div>
-      <div class="app-subtitle">9 – 20 mars 2026</div>
+
     </div>
   </div>
 </div>
@@ -1220,6 +1259,7 @@ async function saveToGitHub(showMsg) {
       driver_children: getDC(),
       drivers_deleted: JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]'),
       extra_days:      JSON.parse(localStorage.getItem('covoit_extra_days') || '[]'),
+      equity_archive:  JSON.parse(localStorage.getItem('covoit_equity_archive') || '[]'),
       last_updated:    new Date().toISOString()
     };
     const body = {
@@ -1256,6 +1296,9 @@ function applyGhData(content) {
       if (!DAYS.find(function(x) { return x.sheet === d.sheet; })) DAYS.push(d);
     });
   }
+  if (content.equity_archive) {
+    localStorage.setItem('covoit_equity_archive', JSON.stringify(content.equity_archive));
+  }
 }
 
 function showLoadingBanner(msg) {
@@ -1286,6 +1329,7 @@ function addRefreshButton() {
     const ok = await loadFromGitHub();
     if (ok) {
       filterPastDays();
+      updatePeriodSubtitle();
       initDriverSelect();
       initChildSelect();
       const activeScreen = document.querySelector('.screen.active');
@@ -1310,11 +1354,13 @@ function addRefreshButton() {
   loadExtraDays();
   filterPastDays();
   loadSavedData();
+  updatePeriodSubtitle();
   addRefreshButton();
   const ok = await loadFromGitHub();
   if (ok) {
     filterPastDays();
     loadSavedData();
+    updatePeriodSubtitle();
   }
   initDriverSelect();
   initChildSelect();
@@ -1324,12 +1370,64 @@ function addRefreshButton() {
 function renderAdminEquityTable() {
   const container = document.getElementById('asec-recap');
   if (!container) return;
-  const rides = getRidesData();
-  const rideDrivers = [...new Set(rides.map(r => r.chauffeur.trim()))];
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
   const norm = s => (s||'').trim().toLowerCase();
-  const lastNameTokens = s => s.split(' ').filter(w => w === w.toUpperCase() && w.length > 1);
+  const lastNameTokens = s => s.trim().split(' ').filter(w => w === w.toUpperCase() && w.length > 1);
+
+  // Récupérer l'archive cumulée (stockée dans localStorage covoit_equity_archive)
+  let archive = [];
+  try { archive = JSON.parse(localStorage.getItem('covoit_equity_archive') || '[]'); } catch(e) {}
+
+  // Récupérer les trajets courants non encore archivés
+  const allRides = getRidesData();
+  const archivedIds = new Set(archive.map(a => a.id));
+  // Ajouter les trajets d'aujourd'hui passés (avant 20h = déjà archivables si date < aujourd'hui)
+  const now = new Date();
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const cutoff20h = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 20, 0, 0);
+
+  // Archiver automatiquement les trajets des jours passés (ou du jour si > 20h)
+  let newArchived = 0;
+  allRides.forEach(r => {
+    if (archivedIds.has(r.id)) return;
+    const day = DAYS.find(d => d.sheet === r.sheet);
+    if (!day) return;
+    const rideDate = day.dateObj;
+    const archivable = rideDate < todayMidnight || (
+      rideDate.toDateString() === now.toDateString() && now >= cutoff20h
+    );
+    if (archivable) {
+      archive.push({ id: r.id, sheet: r.sheet, chauffeur: r.chauffeur.trim(),
+                     enfants: r.enfants, places: r.places || 4, date: rideDate.toISOString() });
+      newArchived++;
+    }
+  });
+  if (newArchived > 0) {
+    localStorage.setItem('covoit_equity_archive', JSON.stringify(archive));
+    saveToGitHub(false);
+  }
+
+  // Combiner archive + trajets d'aujourd'hui non encore archivés pour le calcul
+  const todayRides = allRides.filter(r => {
+    const day = DAYS.find(d => d.sheet === r.sheet);
+    return day && day.dateObj.toDateString() === now.toDateString();
+  });
+  const allForCalc = [...archive];
+  todayRides.forEach(r => {
+    if (!archivedIds.has(r.id)) {
+      allForCalc.push({ id: r.id, sheet: r.sheet, chauffeur: r.chauffeur.trim(),
+                        enfants: r.enfants, places: r.places || 4, date: now.toISOString() });
+    }
+  });
+
+  // ── Union-Find pour regrouper les familles ────────────────────────────────
+  const rideDrivers = [...new Set(allForCalc.map(r => r.chauffeur))];
   const lnIndex = {};
-  rideDrivers.forEach(d => lastNameTokens(d).forEach(ln => { lnIndex[ln] = lnIndex[ln]||[]; lnIndex[ln].push(d); }));
+  rideDrivers.forEach(d => lastNameTokens(d).forEach(ln => {
+    lnIndex[ln] = lnIndex[ln] || []; lnIndex[ln].push(d);
+  }));
+
   function matchDriver(p) {
     if (!p || p === 'nan') return null;
     const pn = norm(p);
@@ -1338,96 +1436,126 @@ function renderAdminEquityTable() {
     const pw = p.trim().split(' ').filter(w => w.length > 2).map(w => norm(w));
     const lnMatches = {};
     pw.forEach(w => (lnIndex[w.toUpperCase()]||[]).forEach(d => { lnMatches[d] = (lnMatches[d]||0)+1; }));
-    if (Object.keys(lnMatches).length) return Object.entries(lnMatches).sort((a,b) => b[1]-a[1])[0][0];
-    const wordMatches = rideDrivers.map(d => ({ d, score: pw.filter(w => norm(d).includes(w)).length })).filter(x => x.score > 0);
-    if (wordMatches.length) return wordMatches.sort((a,b) => b.score-a.score)[0].d;
+    if (Object.keys(lnMatches).length) return Object.entries(lnMatches).sort((a,b)=>b[1]-a[1])[0][0];
+    const wm = rideDrivers.map(d=>({d,score:pw.filter(w=>norm(d).includes(w)).length})).filter(x=>x.score>0);
+    if (wm.length) return wm.sort((a,b)=>b.score-a.score)[0].d;
     return null;
   }
 
-  // Union-Find on canonical driver names
   const uf = {};
-  const find = k => { if (!uf[k] || uf[k] === k) { uf[k] = k; return k; } return uf[k] = find(uf[k]); };
-  const union = (a, b) => { a = find(a); b = find(b); if (a !== b) uf[b] = a; };
+  const find = k => { if (!uf[k]||uf[k]===k){uf[k]=k;return k;} return uf[k]=find(uf[k]); };
+  const union = (a,b) => { a=find(a);b=find(b);if(a!==b)uf[b]=a; };
 
-  // Map each child to its matched canonical driver(s), union families
   const childToDrivers = {};
   DATA.children.forEach(c => {
-    const matched = [c.chauffeur1, c.chauffeur2]
-      .map(ch => matchDriver(ch))
-      .filter(Boolean);
-    // Deduplicate
+    const matched = [c.chauffeur1, c.chauffeur2].map(ch=>matchDriver(ch)).filter(Boolean);
     const uniq = [...new Set(matched)];
     childToDrivers[c.prenom] = uniq;
-    uniq.forEach(d => find(d)); // ensure entry
+    uniq.forEach(d => find(d));
     if (uniq.length === 2) union(uniq[0], uniq[1]);
   });
-  // Ensure all ride drivers have an entry
   rideDrivers.forEach(d => find(d));
 
-  // Build family stats
+  // ── Stats par famille ─────────────────────────────────────────────────────
+  // offertes  = nb enfants d'AUTRES familles transportés par cette famille
+  // utilisees = nb fois où un enfant de cette famille est dans la voiture d'UNE AUTRE famille
   const famStats = {};
   const getFam = k => {
     const fid = find(k);
-    if (!famStats[fid]) famStats[fid] = { drvSet: new Set(), childSet: new Set(), trajets: 0, autres: 0, siens: 0 };
+    if (!famStats[fid]) famStats[fid] = {
+      drvSet: new Set(), childSet: new Set(),
+      trajets: 0, offertes: 0, utilisees: 0
+    };
     return famStats[fid];
   };
-  // Register children per family
+
   DATA.children.forEach(c => {
     childToDrivers[c.prenom].forEach(d => getFam(d).childSet.add(c.prenom));
   });
-  // Register drivers per family
   rideDrivers.forEach(d => getFam(d).drvSet.add(d));
-  // Accumulate ride stats
-  rides.forEach(r => {
-    const fam = getFam(r.chauffeur.trim());
+
+  allForCalc.forEach(r => {
+    const fam = getFam(r.chauffeur);
     fam.trajets++;
     r.enfants.forEach(prenom => {
-      if (fam.childSet.has(prenom)) fam.siens++;
-      else fam.autres++;
+      if (fam.childSet.has(prenom)) {
+        // enfant de la famille dans sa propre voiture → neutre
+      } else {
+        fam.offertes++; // place offerte à un enfant d'une autre famille
+        // trouver la famille de cet enfant et incrémenter ses utilisées
+        const childFam = childToDrivers[prenom];
+        if (childFam && childFam.length > 0) {
+          const cf = getFam(childFam[0]);
+          if (find(childFam[0]) !== find(r.chauffeur)) cf.utilisees++;
+        }
+      }
     });
   });
 
-  // Build display label for a family
-  function famLabel(fid) {
-    const fam = famStats[fid];
-    const lastNames = [...new Set([...fam.drvSet].flatMap(d => lastNameTokens(d).map(ln => ln.toUpperCase())))].sort().join('/');
-    return lastNames ? 'Famille ' + lastNames : null;
-  }
+  // ── Rendu ─────────────────────────────────────────────────────────────────
+  const lastNames = fid => [...new Set([...famStats[fid].drvSet]
+    .flatMap(d => lastNameTokens(d).map(ln => ln.charAt(0)+ln.slice(1).toLowerCase())))].join('/');
 
   const sorted = Object.entries(famStats)
-    .map(([fid, s]) => ({ fid, s, label: famLabel(fid) }))
+    .map(([fid, s]) => ({ fid, s, label: lastNames(fid) }))
     .filter(x => x.label && x.s.childSet.size > 0)
-    .sort((a, b) => b.s.autres - a.s.autres);
+    .sort((a,b) => (b.s.offertes - b.s.utilisees) - (a.s.offertes - a.s.utilisees));
 
-  let html = `<div style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-      <thead>
-        <tr style="color:var(--text-muted);border-bottom:1px solid var(--border);">
-          <th style="text-align:left;padding:8px 6px;font-weight:700;">Famille</th>
-          <th style="text-align:center;padding:8px 4px;font-weight:700;" title="Trajets assurés">Trajets</th>
-          <th style="text-align:center;padding:8px 4px;font-weight:700;" title="Enfants d'autres familles transportés">Autres 👨‍👧</th>
-          <th style="text-align:center;padding:8px 4px;font-weight:700;" title="Ses propres enfants transportés">Siens 🏠</th>
-          <th style="text-align:left;padding:8px 6px;font-weight:700;">Enfants</th>
-        </tr>
-      </thead><tbody>`;
+  const archiveDays = archive.length ? (() => {
+    const dates = [...new Set(archive.map(a => a.date.slice(0,10)))].sort();
+    return dates.length + ' jour' + (dates.length > 1 ? 's' : '') + ' archivé' + (dates.length > 1 ? 's' : '');
+  })() : 'aucun jour archivé';
+
+  let out = `
+  <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+    <span>📊 Cumul depuis le début · ${archiveDays}</span>
+    <button onclick="resetEquityArchive()" style="font-size:10px;padding:3px 8px;background:rgba(255,100,100,0.15);border:1px solid rgba(255,100,100,0.3);border-radius:6px;color:#ff6584;cursor:pointer;">🗑 Reset</button>
+  </div>
+  <div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead>
+      <tr style="color:var(--text-muted);border-bottom:2px solid var(--border);">
+        <th style="text-align:left;padding:8px 6px;">Famille</th>
+        <th style="text-align:center;padding:8px 4px;" title="Places offertes aux autres familles">🟢 Offertes</th>
+        <th style="text-align:center;padding:8px 4px;" title="Places utilisées chez d'autres familles">🔴 Utilisées</th>
+        <th style="text-align:center;padding:8px 4px;" title="Solde = offertes - utilisées">⚖️ Solde</th>
+        <th style="text-align:left;padding:8px 6px;">Enfants</th>
+      </tr>
+    </thead><tbody>`;
 
   sorted.forEach(({ fid, s, label }) => {
-    const color = s.autres >= 3 ? '#43e97b' : s.autres >= 1 ? '#f7971e' : '#ff6584';
+    const solde = s.offertes - s.utilisees;
+    const soldeColor = solde > 0 ? '#43e97b' : solde < 0 ? '#ff6584' : 'var(--text-muted)';
+    const soldeSign = solde > 0 ? '+' : '';
     const badges = [...s.childSet].sort().map(p =>
-      `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);border-radius:20px;padding:2px 7px;font-size:10px;font-weight:600;color:var(--accent);white-space:nowrap;margin:1px;">👦 ${p}</span>`
-    ).join('');
-    html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-      <td style="padding:8px 6px;font-weight:700;font-size:11px;">${label}</td>
-      <td style="text-align:center;padding:8px 4px;">${s.trajets}</td>
-      <td style="text-align:center;padding:8px 4px;font-weight:700;color:${color};">${s.autres}</td>
-      <td style="text-align:center;padding:8px 4px;color:var(--text-muted);">${s.siens}</td>
-      <td style="padding:6px 6px;"><div style="display:flex;flex-wrap:wrap;gap:2px;">${badges}</div></td>
+      `<span style="background:rgba(108,99,255,0.2);border-radius:4px;padding:1px 5px;font-size:10px;">${p}</span>`
+    ).join(' ');
+    out += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+      <td style="padding:8px 6px;font-weight:700;font-size:11px;">Famille ${label}</td>
+      <td style="text-align:center;padding:8px 4px;color:#43e97b;font-weight:700;">${s.offertes}</td>
+      <td style="text-align:center;padding:8px 4px;color:#ff6584;font-weight:700;">${s.utilisees}</td>
+      <td style="text-align:center;padding:8px 4px;font-weight:800;font-size:14px;color:${soldeColor};">${soldeSign}${solde}</td>
+      <td style="padding:6px 6px;"><div style="display:flex;flex-wrap:wrap;gap:3px;">${badges}</div></td>
     </tr>`;
   });
 
-  html += `</tbody></table></div>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">🟢 ≥3 enfants d'autres familles · 🟠 1-2 · 🔴 0</div>`;
-  container.innerHTML = html;
+  out += `</tbody></table></div>
+  <div style="margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.6;">
+    🟢 <b>Offertes</b> : places données à des enfants d'autres familles<br>
+    🔴 <b>Utilisées</b> : places prises dans les voitures d'autres familles
+  </div>`;
+
+  container.innerHTML = out;
+}
+
+function resetEquityArchive() {
+  const pwd = prompt('Mot de passe admin :');
+  if (pwd !== 'fenelon2026') { if (pwd !== null) alert('Mot de passe incorrect.'); return; }
+  if (!confirm('Remettre le compteur d\'équité à zéro ?')) return;
+  localStorage.removeItem('covoit_equity_archive');
+  saveToGitHub(false);
+  renderAdminEquityTable();
+  showToast('✅ Archive d\'équité réinitialisée');
 }
 
 let adminCurrentTab = 'trajets';
@@ -2328,6 +2456,32 @@ function promptGhToken() {
   } else if (t) {
     alert('Token invalide. Il doit commencer par ghp_');
   }
+}
+
+
+function updatePeriodSubtitle() {
+  const el = document.getElementById('app-period-subtitle');
+  if (!el || !DAYS.length) return;
+  const months = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  const first = DAYS[0].dateObj;
+  const last  = DAYS[DAYS.length-1].dateObj;
+  const sameMonth = first.getMonth() === last.getMonth();
+  if (sameMonth) {
+    el.textContent = first.getDate() + ' – ' + last.getDate() + ' ' + months[first.getMonth()] + ' ' + first.getFullYear();
+  } else {
+    el.textContent = first.getDate() + ' ' + months[first.getMonth()] + ' – ' + last.getDate() + ' ' + months[last.getMonth()] + ' ' + last.getFullYear();
+  }
+}
+
+function handleAddWeek() {
+  const pwd = prompt('Mot de passe admin :');
+  if (pwd !== 'fenelon2026') { if (pwd !== null) alert('Mot de passe incorrect.'); return; }
+  const newDays = addNextWeek();
+  if (!newDays.length) { showToast('⚠️ Aucun jour ajouté'); return; }
+  updatePeriodSubtitle();
+  saveToGitHub(false);
+  renderAdminHome();
+  showToast('✅ Semaine ajoutée : ' + newDays[0].label + ' → ' + newDays[newDays.length-1].label);
 }
 
 function closeModal() {
