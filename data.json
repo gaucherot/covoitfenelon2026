@@ -2033,6 +2033,23 @@
         "Luca"
       ],
       "id": "mmnqdk8c5k19"
+    },
+    {
+      "id": "mmo00606nyeh",
+      "sheet": "Jeudi A",
+      "day": "12",
+      "month": "mars",
+      "direction": "ALLER",
+      "heure": "7h25",
+      "time_group": "7h05",
+      "lieu": "NDF",
+      "chauffeur": "MahÃÂÃÂ© GAUCHEROT",
+      "enfants": [
+        "Mila",
+        "Nina",
+        "Virgile"
+      ],
+      "places": 4
     }
   ],
   "children": [
@@ -3085,5 +3102,5 @@
     "Virgine BOULLE"
   ],
   "extra_days": [],
-  "last_updated": "2026-03-12T21:45:58.421Z"
+  "last_updated": "2026-03-12T21:46:57.515Z"
 }
