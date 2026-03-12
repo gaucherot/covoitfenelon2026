@@ -739,6 +739,7 @@
       "heure": "8h00",
       "lieu": "NDF",
       "enfants": [
+        "Camille",
         "Capucine",
         "Noah",
         "Olivia"
@@ -3235,5 +3236,5 @@
       "date": "2026-03-11T23:00:00.000Z"
     }
   ],
-  "last_updated": "2026-03-12T22:08:22.792Z"
+  "last_updated": "2026-03-12T22:11:14.278Z"
 }
