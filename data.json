@@ -735,22 +735,6 @@
       "month": "Mars",
       "direction": "ALLER",
       "time_group": "8h00",
-      "chauffeur": "Marido DEROCHE",
-      "heure": "8h00",
-      "lieu": "NDF",
-      "enfants": [
-        "Capucine",
-        "Eyrian"
-      ],
-      "id": "mmnqdk8cwj0v",
-      "places": 4
-    },
-    {
-      "sheet": "Jeudi A",
-      "day": "12",
-      "month": "Mars",
-      "direction": "ALLER",
-      "time_group": "8h00",
       "chauffeur": "David BRILLANT",
       "heure": "7h10",
       "lieu": "NDF",
@@ -3101,5 +3085,5 @@
     "Virgine BOULLE"
   ],
   "extra_days": [],
-  "last_updated": "2026-03-12T21:40:33.674Z"
+  "last_updated": "2026-03-12T21:45:58.421Z"
 }
