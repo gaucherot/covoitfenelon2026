@@ -736,15 +736,14 @@
       "direction": "ALLER",
       "time_group": "8h00",
       "chauffeur": "David BRILLANT",
-      "heure": "7h10",
+      "heure": "8h00",
       "lieu": "NDF",
       "enfants": [
-        "Camille",
-        "Olivia",
         "Noah",
-        "Finnian"
+        "Olivia"
       ],
-      "id": "mmnqdk8cwsc2"
+      "id": "mmnqdk8cwsc2",
+      "places": 4
     },
     {
       "sheet": "Jeudi A",
@@ -3085,5 +3084,5 @@
     "Virgine BOULLE"
   ],
   "extra_days": [],
-  "last_updated": "2026-03-12T21:47:39.451Z"
+  "last_updated": "2026-03-12T21:48:04.844Z"
 }
