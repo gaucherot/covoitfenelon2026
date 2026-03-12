@@ -739,6 +739,8 @@
       "heure": "8h00",
       "lieu": "NDF",
       "enfants": [
+        "Capucine",
+        "Eyrian",
         "Noah",
         "Olivia"
       ],
@@ -3084,5 +3086,5 @@
     "Virgine BOULLE"
   ],
   "extra_days": [],
-  "last_updated": "2026-03-12T21:48:04.844Z"
+  "last_updated": "2026-03-12T21:48:21.282Z"
 }
