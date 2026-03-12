@@ -3086,5 +3086,155 @@
     "Virgine BOULLE"
   ],
   "extra_days": [],
-  "last_updated": "2026-03-12T21:48:21.282Z"
+  "equity_archive": [
+    {
+      "id": "mmnqdk8clzjl",
+      "sheet": "Jeudi A",
+      "chauffeur": "Alexandre BOULLE",
+      "enfants": [
+        "Teiva",
+        "Lucie",
+        "LÃÂÃÂ©onie"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cbmwl",
+      "sheet": "Jeudi A",
+      "chauffeur": "Nathalie SUDRIAL",
+      "enfants": [
+        "Matilda",
+        "Vanille",
+        "CÃÂÃÂ´me",
+        "CÃÂÃÂ©lia"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cwsc2",
+      "sheet": "Jeudi A",
+      "chauffeur": "David BRILLANT",
+      "enfants": [
+        "Capucine",
+        "Eyrian",
+        "Noah",
+        "Olivia"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cn0tt",
+      "sheet": "Jeudi A",
+      "chauffeur": "Frances MOULAERT",
+      "enfants": [
+        "Matilda",
+        "Andy",
+        "Lou",
+        "CÃÂÃÂ©lia"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8co1xw",
+      "sheet": "Jeudi A",
+      "chauffeur": "Lisa VAN HELDEN",
+      "enfants": [
+        "Gabriel",
+        "Valentin",
+        "Sidney"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cge9r",
+      "sheet": "Jeudi A",
+      "chauffeur": "Fabienne CHARLES MAC-MAHON",
+      "enfants": [
+        "Isaac",
+        "Sam",
+        "TÃÂÃÂ©rence"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8c8ug7",
+      "sheet": "Jeudi A",
+      "chauffeur": "Alexandra PEACOCK",
+      "enfants": [
+        "Sophie"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cc9ua",
+      "sheet": "Jeudi A",
+      "chauffeur": "Alexandra DALMASSO",
+      "enfants": [
+        "Mila",
+        "Lisa",
+        "Cesar",
+        "CÃÂÃÂ©lia"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8czkwq",
+      "sheet": "Jeudi A",
+      "chauffeur": "Frances MOULAERT",
+      "enfants": [
+        "Matilda",
+        "Andy",
+        "Oscar"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cf6gl",
+      "sheet": "Jeudi A",
+      "chauffeur": "Alexandra PEACOCK",
+      "enfants": [
+        "Gabriel",
+        "Valentin",
+        "Sophie",
+        "Sidney",
+        "Olivia"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8csmj3",
+      "sheet": "Jeudi A",
+      "chauffeur": "Fabienne CHARLES MAC-MAHON",
+      "enfants": [
+        "Sam",
+        "TÃÂÃÂ©rence",
+        "Eyrian"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    },
+    {
+      "id": "mmnqdk8cbdvc",
+      "sheet": "Jeudi A",
+      "chauffeur": "Marido DEROCHE",
+      "enfants": [
+        "Camille",
+        "Capucine",
+        "Finnian"
+      ],
+      "places": 4,
+      "date": "2026-03-11T23:00:00.000Z"
+    }
+  ],
+  "last_updated": "2026-03-12T22:07:46.793Z"
 }
