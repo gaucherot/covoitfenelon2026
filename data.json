@@ -3100,7 +3100,38 @@
     "Virginie BOULLE",
     "Virgine BOULLE"
   ],
-  "extra_days": [],
+  "extra_days": [
+    {
+      "sheet": "Lundi A",
+      "label": "Lun 23/3",
+      "date": "Lundi 23 mars",
+      "dateObj": "2026-03-22T23:00:00.000Z"
+    },
+    {
+      "sheet": "Mardi A",
+      "label": "Mar 24/3",
+      "date": "Mardi 24 mars",
+      "dateObj": "2026-03-23T23:00:00.000Z"
+    },
+    {
+      "sheet": "Mercredi A",
+      "label": "Mer 25/3",
+      "date": "Mercredi 25 mars",
+      "dateObj": "2026-03-24T23:00:00.000Z"
+    },
+    {
+      "sheet": "Jeudi A",
+      "label": "Jeu 26/3",
+      "date": "Jeudi 26 mars",
+      "dateObj": "2026-03-25T23:00:00.000Z"
+    },
+    {
+      "sheet": "Vendredi A",
+      "label": "Ven 27/3",
+      "date": "Vendredi 27 mars",
+      "dateObj": "2026-03-26T23:00:00.000Z"
+    }
+  ],
   "equity_archive": [
     {
       "id": "mmnqdk8clzjl",
@@ -3251,5 +3282,5 @@
       "date": "2026-03-11T23:00:00.000Z"
     }
   ],
-  "last_updated": "2026-03-13T23:16:34.594Z"
+  "last_updated": "2026-03-13T23:20:49.494Z"
 }
