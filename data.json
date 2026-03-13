@@ -2049,6 +2049,22 @@
         "Sam"
       ],
       "places": 4
+    },
+    {
+      "id": "mmpitfb68k61",
+      "sheet": "Vendredi A",
+      "day": "27",
+      "month": "mars",
+      "direction": "ALLER",
+      "heure": "7h05",
+      "time_group": "7h05",
+      "lieu": "NDF",
+      "chauffeur": "Delphine LAMARRE",
+      "enfants": [
+        "Clara",
+        "Jeanne"
+      ],
+      "places": 4
     }
   ],
   "children": [
@@ -3282,5 +3298,5 @@
       "date": "2026-03-11T23:00:00.000Z"
     }
   ],
-  "last_updated": "2026-03-13T23:20:49.494Z"
+  "last_updated": "2026-03-13T23:21:21.874Z"
 }
