@@ -594,56 +594,8 @@ function filterPastDays() {
 }
 
 // Build a DAYS entry from a JS Date
-function makeDayEntry(date, weekIndex) {
-  const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-  const MOIS  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-  const LABELS = ['Lun','Mar','Mer','Jeu','Ven'];
-  const d = date.getDate(), m = date.getMonth(), wd = date.getDay();
-  const weekLetter = String.fromCharCode(65 + weekIndex); // A, B, C...
-  const nomJour = JOURS[wd];
-  const labelJour = LABELS[wd - 1]; // Mon=1..Fri=5
-  const sheet = nomJour + ' ' + weekLetter;
-  const label = labelJour + ' ' + d + '/' + (m+1);
-  const dateStr = nomJour + ' ' + d + ' ' + MOIS[m];
-  return {sheet, label, date: dateStr, dateObj: new Date(date)};
-}
 
 // Add next Mon–Fri week to DAYS
-function addNextWeek() {
-  const lastDay = DAYS.length ? DAYS[DAYS.length-1].dateObj : new Date();
-  const next = new Date(lastDay);
-  next.setDate(next.getDate() + 1);
-  while (next.getDay() !== 1) next.setDate(next.getDate() + 1);
-
-  const jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
-  const mois  = ['','janvier','février','mars','avril','mai','juin',
-                 'juillet','août','septembre','octobre','novembre','décembre'];
-  const newDays = [];
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(next);
-    d.setDate(next.getDate() + i);
-    if (d.getDay() === 0 || d.getDay() === 6) continue;
-    const iso = d.toISOString().slice(0,10); // "2026-03-23"
-    const jourNom = jours[d.getDay()-1];
-    newDays.push({
-      sheet:   iso,
-      label:   jourNom.slice(0,3) + ' ' + d.getDate() + '/' + (d.getMonth()+1),
-      date:    jourNom + ' ' + d.getDate() + ' ' + mois[d.getMonth()+1],
-      dateObj: d
-    });
-  }
-  DAYS.push(...newDays);
-  // Sauvegarder les extra_days (tout ce qui n'est pas dans les semaines fixes A et B)
-  const fixedSheets = new Set([
-    'Lundi A','Mardi A','Mercredi A','Jeudi A','Vendredi A',
-    'Lundi B','Mardi B','Mercredi B','Jeudi B','Vendredi B'
-  ]);
-  localStorage.setItem('covoit_extra_days', JSON.stringify(
-    DAYS.filter(d => !fixedSheets.has(d.sheet))
-        .map(d => ({...d, dateObj: d.dateObj.toISOString()}))
-  ));
-  return newDays;
-}
 
 // Load extra weeks from localStorage
 function loadExtraDays() {
@@ -1626,9 +1578,8 @@ function renderAdminHome() {
     ? '<span style="font-size:11px;background:#22c55e22;color:#22c55e;border:1px solid #22c55e44;border-radius:6px;padding:2px 8px;margin-left:8px;">🔗 GitHub sync</span>'
     : '<span style="font-size:11px;background:#f9731622;color:#f97316;border:1px solid #f9731644;border-radius:6px;padding:2px 8px;margin-left:8px;">⚠️ Hors ligne</span>';
   screen.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div style="margin-bottom:12px;">
       <div style="font-size:18px;font-weight:800;">⚙️ Administration ${ghTokenBadge}</div>
-      <button onclick="handleAddWeek()" style="background:linear-gradient(135deg,#43e97b,#00d2ff);border:none;border-radius:10px;color:#1a1b2e;font-family:'Outfit',sans-serif;font-size:12px;font-weight:800;padding:8px 12px;cursor:pointer;white-space:nowrap;">📅 Nouvelle semaine</button>
     </div>
 
     <div class="view-toggle" style="margin-bottom:16px;overflow-x:auto;display:flex;gap:6px;flex-wrap:nowrap;">
@@ -1843,7 +1794,14 @@ function renderDriverChildrenSection(myChildren, editMode) {
 }
 
 function openDriverForm(idx, driverName) {
-  var drivers = getDriversData();
+  // Charger TOUS les drivers y compris ceux dans la blacklist (pour pouvoir les rééditer)
+  var allDriversRaw = [];
+  try {
+    var saved = localStorage.getItem('covoit_drivers');
+    if (saved) allDriversRaw = JSON.parse(saved);
+  } catch(e) {}
+  if (!allDriversRaw.length) allDriversRaw = (window.PREFILLED_DRIVERS || []).slice();
+  var drivers = allDriversRaw;
   var knownNames = new Set(drivers.map(function(d){return d.nom;}));
   DATA.rides.forEach(function(r){ if (r.chauffeur && !knownNames.has(r.chauffeur)) { drivers.push({ nom: r.chauffeur, tel: '', places: '', email: '', note: '', famille: '' }); knownNames.add(r.chauffeur); }});
 
@@ -1931,6 +1889,17 @@ function saveDriverForm() {
     else drivers.push(driverData);
   }
   saveDriversData(drivers);
+
+  // Si ce chauffeur était dans la blacklist, l'en retirer (réactivation explicite)
+  let blacklist = JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]');
+  const blIdx = blacklist.indexOf(nom);
+  if (blIdx >= 0) blacklist.splice(blIdx, 1);
+  // Aussi retirer l'ancien nom si renommé
+  if (oldName && oldName !== nom) {
+    const blOldIdx = blacklist.indexOf(oldName);
+    if (blOldIdx >= 0) blacklist.splice(blOldIdx, 1);
+  }
+  localStorage.setItem('covoit_drivers_deleted', JSON.stringify(blacklist));
 
   // Mettre à jour DRIVER_CHILDREN depuis les checkboxes
   const checkboxes = document.querySelectorAll('#df-children-list input[type=checkbox]');
@@ -2482,42 +2451,9 @@ function deleteChild(idx) {
 }
 
 
-function promptGhToken() {
-  const t = prompt('Entrez votre token GitHub (ghp_...):\n(Il sera stocké localement sur cet appareil uniquement)');
-  if (t && t.startsWith('ghp_')) {
-    setGhToken(t);
-    showToast('✅ Token GitHub enregistré !');
-    renderAdminHome(); // Rafraîchir pour afficher le badge vert
-  } else if (t) {
-    alert('Token invalide. Il doit commencer par ghp_');
-  }
-}
 
 
-function updatePeriodSubtitle() {
-  const el = document.getElementById('app-period-subtitle');
-  if (!el || !DAYS.length) return;
-  const months = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-  const first = DAYS[0].dateObj;
-  const last  = DAYS[DAYS.length-1].dateObj;
-  const sameMonth = first.getMonth() === last.getMonth();
-  if (sameMonth) {
-    el.textContent = first.getDate() + ' – ' + last.getDate() + ' ' + months[first.getMonth()] + ' ' + first.getFullYear();
-  } else {
-    el.textContent = first.getDate() + ' ' + months[first.getMonth()] + ' – ' + last.getDate() + ' ' + months[last.getMonth()] + ' ' + last.getFullYear();
-  }
-}
 
-function handleAddWeek() {
-  const pwd = prompt('Mot de passe admin :');
-  if (pwd !== 'fenelon2026') { if (pwd !== null) alert('Mot de passe incorrect.'); return; }
-  const newDays = addNextWeek();
-  if (!newDays.length) { showToast('⚠️ Aucun jour ajouté'); return; }
-  updatePeriodSubtitle();
-  saveToGitHub(false);
-  renderAdminHome();
-  showToast('✅ Semaine ajoutée : ' + newDays[0].label + ' → ' + newDays[newDays.length-1].label);
-}
 
 function closeModal() {
   document.getElementById('admin-modal').style.display = 'none';
