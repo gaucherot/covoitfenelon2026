@@ -1316,7 +1316,6 @@ function addRefreshButton() {
     const ok = await loadFromGitHub();
     if (ok) {
       filterPastDays();
-      updatePeriodSubtitle();
       initDriverSelect();
       initChildSelect();
       const activeScreen = document.querySelector('.screen.active');
@@ -1341,13 +1340,11 @@ function addRefreshButton() {
   loadExtraDays();
   filterPastDays();
   loadSavedData();
-  updatePeriodSubtitle();
   addRefreshButton();
   const ok = await loadFromGitHub();
   if (ok) {
     filterPastDays();
     loadSavedData();
-    updatePeriodSubtitle();
   }
   initDriverSelect();
   initChildSelect();
