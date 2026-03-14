@@ -565,20 +565,31 @@ function filterPastDays() {
   const now = new Date();
   const today = new Date(now); today.setHours(0,0,0,0);
 
-  // Lundi de la semaine courante
-  const dayOfWeek = today.getDay() === 0 ? 6 : today.getDay() - 1;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - dayOfWeek);
+  // Trouver le lundi de référence :
+  // - Lun-Ven : lundi de la semaine courante
+  // - Sam-Dim : lundi de la semaine SUIVANTE (on anticipe)
+  const dow = today.getDay(); // 0=dim, 1=lun ... 6=sam
+  let monday = new Date(today);
+  if (dow === 0) {
+    // Dimanche : lundi dans 1 jour
+    monday.setDate(today.getDate() + 1);
+  } else if (dow === 6) {
+    // Samedi : lundi dans 2 jours
+    monday.setDate(today.getDate() + 2);
+  } else {
+    // Lundi-Vendredi : lundi de cette semaine
+    monday.setDate(today.getDate() - (dow - 1));
+  }
 
-  // Fenêtre de fin : 2 semaines à partir du lundi courant
+  // Fenêtre : 2 semaines à partir du lundi de référence
   // + 1 semaine supplémentaire si vendredi >= 20h
-  const isFriday = today.getDay() === 5;
+  const isFriday = dow === 5;
   const isAfter20h = now.getHours() >= 20;
   const extraWeek = (isFriday && isAfter20h) ? 7 : 0;
   const limit = new Date(monday);
   limit.setDate(monday.getDate() + 14 + extraWeek);
 
-  // Garder uniquement les jours >= aujourd'hui ET dans la fenêtre
+  // Garder les jours >= aujourd'hui ET dans la fenêtre
   DAYS = DAYS.filter(d => d.dateObj >= today && d.dateObj < limit);
 }
 
