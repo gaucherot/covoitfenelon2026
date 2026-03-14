@@ -1,0 +1,113 @@
+name: Ajouter la semaine suivante
+
+on:
+  schedule:
+    # Chaque vendredi à 20h00 heure de Paris (= 19h00 UTC en heure d'été)
+    - cron: '0 19 * * 5'
+  workflow_dispatch:
+    # Permet aussi de le déclencher manuellement depuis GitHub
+
+jobs:
+  add-week:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ajouter la semaine suivante dans data.json
+        run: |
+          python3 << 'PYEOF'
+          import json, datetime, os
+
+          with open('data.json', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+
+          extra_days = data.get('extra_days', [])
+          
+          # Trouver le dernier jour connu
+          all_dates = []
+          # Jours fixes semaine A (9-13 mars) et B (16-20 mars)
+          fixed = [
+            datetime.date(2026, 3, 9),  datetime.date(2026, 3, 10),
+            datetime.date(2026, 3, 11), datetime.date(2026, 3, 12),
+            datetime.date(2026, 3, 13), datetime.date(2026, 3, 16),
+            datetime.date(2026, 3, 17), datetime.date(2026, 3, 18),
+            datetime.date(2026, 3, 19), datetime.date(2026, 3, 20),
+          ]
+          all_dates.extend(fixed)
+          
+          for d in extra_days:
+              try:
+                  dt = datetime.date.fromisoformat(d['dateObj'][:10])
+                  all_dates.append(dt)
+              except:
+                  pass
+          
+          last_date = max(all_dates) if all_dates else datetime.date.today()
+          
+          # Trouver le lundi suivant
+          next_monday = last_date + datetime.timedelta(days=1)
+          while next_monday.weekday() != 0:  # 0 = lundi
+              next_monday += datetime.timedelta(days=1)
+          
+          # Vérifier que cette semaine n'existe pas déjà
+          existing_dates = {d['dateObj'][:10] for d in extra_days}
+          if next_monday.isoformat() in existing_dates:
+              print(f"Semaine du {next_monday} déjà présente, rien à faire.")
+              exit(0)
+          
+          # Déterminer la lettre de semaine (C, D, E, ...)
+          used_letters = set()
+          for d in extra_days:
+              sheet = d.get('sheet', '')
+              letter = sheet.split(' ')[-1]
+              if len(letter) == 1 and letter.isalpha():
+                  used_letters.add(letter)
+          used_letters.update({'A', 'B'})  # semaines initiales
+          
+          next_letter = 'A'
+          for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+              if c not in used_letters:
+                  next_letter = c
+                  break
+          
+          # Noms des jours et mois en français
+          jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
+          mois  = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                   'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+          
+          new_days = []
+          for i in range(5):
+              d = next_monday + datetime.timedelta(days=i)
+              if d.weekday() >= 5:  # skip weekend (ne devrait pas arriver)
+                  continue
+              jour_nom = jours[d.weekday()]
+              sheet    = f"{jour_nom} {next_letter}"
+              label    = f"{jour_nom[:3]} {d.day}/{d.month}"
+              date_str = f"{jour_nom} {d.day} {mois[d.month]}"
+              new_days.append({
+                  "sheet":   sheet,
+                  "label":   label,
+                  "date":    date_str,
+                  "dateObj": d.isoformat() + "T00:00:00.000Z"
+              })
+          
+          data['extra_days'] = extra_days + new_days
+          data['last_updated'] = datetime.datetime.utcnow().isoformat() + 'Z'
+          
+          with open('data.json', 'w', encoding='utf-8') as f:
+              json.dump(data, f, ensure_ascii=False, indent=2)
+          
+          monday_str = next_monday.strftime('%d/%m/%Y')
+          friday = next_monday + datetime.timedelta(days=4)
+          friday_str = friday.strftime('%d/%m/%Y')
+          print(f"✅ Semaine {next_letter} ajoutée : {monday_str} → {friday_str}")
+          PYEOF
+
+      - name: Commit et push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "🗓️ Ajout automatique semaine suivante (vendredi 20h)"
+          git push
