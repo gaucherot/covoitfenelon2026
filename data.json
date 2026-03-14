@@ -2669,14 +2669,6 @@
       "famille": "BOULLE"
     },
     {
-      "nom": "Virginie BOULLE",
-      "tel": "0785304459",
-      "email": "",
-      "places": "",
-      "note": "",
-      "famille": "BOULLE"
-    },
-    {
       "nom": "David BRILLANT",
       "tel": "0622730205",
       "email": "",
@@ -3200,5 +3192,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-14T18:19:29.567738+00:00"
+  "last_updated": "2026-03-14T18:36:03.258Z"
 }
