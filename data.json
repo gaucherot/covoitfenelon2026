@@ -2955,14 +2955,6 @@
       "email": "",
       "note": "",
       "famille": ""
-    },
-    {
-      "nom": "Didier DEROCH",
-      "tel": "",
-      "places": "",
-      "email": "",
-      "note": "",
-      "famille": "DEROCHE"
     }
   ],
   "driver_children": {
@@ -3112,7 +3104,8 @@
   "drivers_deleted": [
     "Olivier Tronchon ",
     "Antony NOWE",
-    "Virgine BOULLE"
+    "Virgine BOULLE",
+    "Didier DEROCH"
   ],
   "extra_days": [
     {
@@ -3207,5 +3200,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-14T18:45:18.316Z"
+  "last_updated": "2026-03-14T18:45:30.023Z"
 }
