@@ -1874,15 +1874,15 @@
       "direction": "RETOUR",
       "time_group": "16h50",
       "chauffeur": "David PEACOCK",
-      "heure": "",
+      "heure": "16h50",
       "lieu": "lycée",
       "enfants": [
-        "Sophie",
-        "Lucie",
         "Emma",
+        "Sophie",
         "Virgile"
       ],
-      "id": "mmnqdk8cfx9k"
+      "id": "mmnqdk8cfx9k",
+      "places": 4
     },
     {
       "sheet": "Vendredi B",
@@ -3222,5 +3222,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:33:25.994Z"
+  "last_updated": "2026-03-15T10:33:47.517Z"
 }
