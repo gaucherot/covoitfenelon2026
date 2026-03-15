@@ -2022,25 +2022,6 @@
       "id": "mmnqdk8ci9h0"
     },
     {
-      "sheet": "Vendredi B",
-      "day": "20",
-      "month": "Mars",
-      "direction": "RETOUR",
-      "time_group": "16h50",
-      "chauffeur": "Louise CARSON",
-      "heure": "",
-      "lieu": "P. Mairie",
-      "enfants": [
-        "Camille",
-        "Olivia",
-        "Noah",
-        "Finnian",
-        "Joshua",
-        "Luca"
-      ],
-      "id": "mmnqdk8c5k19"
-    },
-    {
       "id": "mmrm82yck8u5",
       "sheet": "Jeudi B",
       "day": "19",
@@ -3224,5 +3205,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:34:01.978Z"
+  "last_updated": "2026-03-15T10:35:47.035Z"
 }
