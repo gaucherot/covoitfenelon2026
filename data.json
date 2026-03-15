@@ -1839,22 +1839,6 @@
       "day": "19",
       "month": "Mars",
       "direction": "ALLER",
-      "time_group": "8h00",
-      "chauffeur": "Marido DEROCHE",
-      "heure": "7h10",
-      "lieu": "NDF",
-      "enfants": [
-        "Capucine",
-        "Lucie",
-        "Emma"
-      ],
-      "id": "mmnqdk8cqwr4"
-    },
-    {
-      "sheet": "Jeudi B",
-      "day": "19",
-      "month": "Mars",
-      "direction": "ALLER",
       "time_group": "8h30",
       "chauffeur": "Lisa VAN HELDEN",
       "heure": "7h30",
@@ -3207,5 +3191,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:29:03.717Z"
+  "last_updated": "2026-03-15T10:31:06.893Z"
 }
