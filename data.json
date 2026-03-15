@@ -1376,7 +1376,7 @@
       "month": "Mars",
       "direction": "RETOUR",
       "time_group": "17h20",
-      "chauffeur": "Mahé GAUCHEROT",
+      "chauffeur": "Guillaume GAUCHEROT",
       "heure": "17h20",
       "lieu": "lycée",
       "enfants": [
@@ -3204,5 +3204,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:25:11.584Z"
+  "last_updated": "2026-03-15T10:25:51.514Z"
 }
