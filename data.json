@@ -1375,10 +1375,10 @@
       "day": "16",
       "month": "Mars",
       "direction": "RETOUR",
-      "time_group": "17h20",
+      "time_group": "16h50",
       "chauffeur": "Guillaume GAUCHEROT",
-      "heure": "17h20",
-      "lieu": "lycée",
+      "heure": "16h50",
+      "lieu": "P. Mairie",
       "enfants": [
         "Camille",
         "Isaac",
@@ -3204,5 +3204,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:25:51.514Z"
+  "last_updated": "2026-03-15T10:26:34.775Z"
 }
