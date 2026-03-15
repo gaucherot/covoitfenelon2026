@@ -2057,6 +2057,19 @@
         "Virgile"
       ],
       "places": 4
+    },
+    {
+      "id": "mmrm9k9unlcw",
+      "sheet": "Jeudi B",
+      "day": "19",
+      "month": "mars",
+      "direction": "RETOUR",
+      "heure": "12h00",
+      "time_group": "12h55",
+      "lieu": "lycée",
+      "chauffeur": "Mahé GAUCHEROT",
+      "enfants": [],
+      "places": 4
     }
   ],
   "children": [
@@ -3209,5 +3222,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:32:16.892Z"
+  "last_updated": "2026-03-15T10:33:25.994Z"
 }
