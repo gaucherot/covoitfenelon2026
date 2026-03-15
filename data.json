@@ -1757,15 +1757,16 @@
       "direction": "RETOUR",
       "time_group": "12h55",
       "chauffeur": "Mahé GAUCHEROT",
-      "heure": "",
+      "heure": "12h55",
       "lieu": "lycée",
       "enfants": [
         "Camille",
-        "Léonie",
         "Emma",
-        "Joshua"
+        "Joshua",
+        "Lucie"
       ],
-      "id": "mmnqdk8c5f1p"
+      "id": "mmnqdk8c5f1p",
+      "places": 4
     },
     {
       "sheet": "Jeudi B",
@@ -3206,5 +3207,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:27:49.896Z"
+  "last_updated": "2026-03-15T10:29:03.717Z"
 }
