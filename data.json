@@ -1575,13 +1575,15 @@
       "direction": "RETOUR",
       "time_group": "16h50",
       "chauffeur": "Mahé GAUCHEROT",
-      "heure": "",
+      "heure": "16h50",
       "lieu": "lycée",
       "enfants": [
-        "Nina",
-        "Lucie"
+        "Léonie",
+        "Lucie",
+        "Nina"
       ],
-      "id": "mmnqdk8c2cgx"
+      "id": "mmnqdk8c2cgx",
+      "places": 4
     },
     {
       "sheet": "Mercredi B",
@@ -3204,5 +3206,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:26:34.775Z"
+  "last_updated": "2026-03-15T10:27:49.896Z"
 }
