@@ -2064,11 +2064,13 @@
       "day": "19",
       "month": "mars",
       "direction": "RETOUR",
-      "heure": "12h00",
+      "heure": "12h55",
       "time_group": "12h55",
       "lieu": "lycée",
       "chauffeur": "Mahé GAUCHEROT",
-      "enfants": [],
+      "enfants": [
+        "Lucie"
+      ],
       "places": 4
     }
   ],
@@ -3222,5 +3224,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-15T10:33:47.517Z"
+  "last_updated": "2026-03-15T10:34:01.978Z"
 }
