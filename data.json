@@ -1625,15 +1625,16 @@
       "direction": "ALLER",
       "time_group": "8h00",
       "chauffeur": "Michon SWEET",
-      "heure": "7h10",
+      "heure": "8h00",
       "lieu": "NDF",
       "enfants": [
-        "Lucie",
         "Emma",
-        "Virgile",
-        "Luca"
+        "Luca",
+        "Lucie",
+        "Virgile"
       ],
-      "id": "mmnqdk8c798p"
+      "id": "mmnqdk8c798p",
+      "places": 4
     },
     {
       "sheet": "Mercredi B",
@@ -3205,5 +3206,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-16T05:17:32.551Z"
+  "last_updated": "2026-03-18T11:55:49.420Z"
 }
