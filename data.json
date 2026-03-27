@@ -3233,8 +3233,38 @@
       "label": "Ven 17/4",
       "date": "Vendredi 17 avril",
       "dateObj": "2026-04-17T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-04-20",
+      "label": "Lun 20/4",
+      "date": "Lundi 20 avril",
+      "dateObj": "2026-04-20T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-04-21",
+      "label": "Mar 21/4",
+      "date": "Mardi 21 avril",
+      "dateObj": "2026-04-21T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-04-22",
+      "label": "Mer 22/4",
+      "date": "Mercredi 22 avril",
+      "dateObj": "2026-04-22T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-04-23",
+      "label": "Jeu 23/4",
+      "date": "Jeudi 23 avril",
+      "dateObj": "2026-04-23T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-04-24",
+      "label": "Ven 24/4",
+      "date": "Vendredi 24 avril",
+      "dateObj": "2026-04-24T00:00:00.000Z"
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-03-20T20:00:32.271237+00:00"
+  "last_updated": "2026-03-27T20:04:29.022058+00:00"
 }
