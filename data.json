@@ -3430,8 +3430,38 @@
       "label": "Ven 29/5",
       "date": "Vendredi 29 mai",
       "dateObj": "2026-05-29T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-06-01",
+      "label": "Lun 1/6",
+      "date": "Lundi 1 juin",
+      "dateObj": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-06-02",
+      "label": "Mar 2/6",
+      "date": "Mardi 2 juin",
+      "dateObj": "2026-06-02T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-06-03",
+      "label": "Mer 3/6",
+      "date": "Mercredi 3 juin",
+      "dateObj": "2026-06-03T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-06-04",
+      "label": "Jeu 4/6",
+      "date": "Jeudi 4 juin",
+      "dateObj": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-06-05",
+      "label": "Ven 5/6",
+      "date": "Vendredi 5 juin",
+      "dateObj": "2026-06-05T00:00:00.000Z"
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-05-01T20:03:56.146890+00:00"
+  "last_updated": "2026-05-08T20:06:18.133080+00:00"
 }
