@@ -3940,8 +3940,38 @@
       "label": "Ven 25/9",
       "date": "Vendredi 25 septembre",
       "dateObj": "2026-09-25T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-09-28",
+      "label": "Lun 28/9",
+      "date": "Lundi 28 septembre",
+      "dateObj": "2026-09-28T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-09-29",
+      "label": "Mar 29/9",
+      "date": "Mardi 29 septembre",
+      "dateObj": "2026-09-29T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-09-30",
+      "label": "Mer 30/9",
+      "date": "Mercredi 30 septembre",
+      "dateObj": "2026-09-30T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-10-01",
+      "label": "Jeu 1/10",
+      "date": "Jeudi 1 octobre",
+      "dateObj": "2026-10-01T00:00:00.000Z"
+    },
+    {
+      "sheet": "2026-10-02",
+      "label": "Ven 2/10",
+      "date": "Vendredi 2 octobre",
+      "dateObj": "2026-10-02T00:00:00.000Z"
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-08-29T01:59:19.999032+00:00"
+  "last_updated": "2026-09-04T21:15:17.929613+00:00"
 }
