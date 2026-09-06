@@ -922,14 +922,6 @@
       "email": "",
       "note": "",
       "famille": ""
-    },
-    {
-      "nom": "Antony NOWE",
-      "tel": "",
-      "email": "",
-      "places": "",
-      "note": "",
-      "famille": "NOWE"
     }
   ],
   "driver_children": {
@@ -1079,7 +1071,8 @@
   "drivers_deleted": [
     "Olivier Tronchon ",
     "Virgine BOULLE",
-    "Didier DEROCH"
+    "Didier DEROCH",
+    "Antony NOWE"
   ],
   "extra_days": [
     {
@@ -1924,5 +1917,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-09-06T15:29:41.989Z"
+  "last_updated": "2026-09-06T21:06:04.185Z"
 }
