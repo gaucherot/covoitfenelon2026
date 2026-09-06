@@ -1228,7 +1228,16 @@ const normEmail = s => String(s || '').trim().toLowerCase();
 // Rapprochement des noms : sans accents, sans espaces multiples, insensible à la casse
 const normName  = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                         .trim().toLowerCase().replace(/\s+/g, ' ');
-const normTel   = s => String(s || '').replace(/\D/g, '').replace(/^33/, '0');
+// Numéro ramené au format national : 06…, quelle que soit la saisie
+// (+33 6…, 0033 6…, 6… sans le zéro, espaces, points, tirets)
+const normTel = s => {
+  let t = String(s || '').replace(/\D/g, '');
+  if (t.startsWith('0033')) t = t.slice(4);
+  else if (t.startsWith('33') && t.length === 11) t = t.slice(2);
+  else if (t.startsWith('0')) return t;
+  if (t.length === 9) t = '0' + t;
+  return t;
+};
 const isEmail   = s => /@/.test(String(s || ''));
 
 // Nom de famille = les mots en MAJUSCULES du nom complet ("Virginie BOULLE" → BOULLE)
