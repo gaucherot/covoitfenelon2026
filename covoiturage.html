@@ -830,7 +830,7 @@ function initDriverSelect() {
   const sel = document.getElementById('driver-select');
   const cur = sel.value;
   while (sel.options.length > 1) sel.remove(1);
-  const drivers = [...new Set(DATA.rides.map(r => r.chauffeur))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const drivers = allDriverNames(); // tous les conducteurs connus, pas seulement ceux qui roulent cette semaine
   drivers.forEach(d => {
     const opt = document.createElement('option');
     opt.value = d;
@@ -2914,7 +2914,7 @@ function refreshAll() {
   const dSel = document.getElementById('driver-select');
   const curDriver = dSel.value;
   while (dSel.options.length > 1) dSel.remove(1);
-  const drivers = [...new Set(DATA.rides.map(r => r.chauffeur))].sort();
+  const drivers = allDriverNames();
   drivers.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; dSel.appendChild(o); });
   if (curDriver) { dSel.value = curDriver; loadDriverRides(curDriver); }
 
