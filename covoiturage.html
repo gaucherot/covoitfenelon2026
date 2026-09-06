@@ -1112,13 +1112,16 @@ function planningRideCardHtml(r) {
   const cap = getCapacityInfo(r);
   const color = stopColor(r.lieu);
   const heure = r.heure || r.time_group || '';
-  const kids = r.enfants.map(k =>
-    `<span onclick="goToChild('${jsStr(k)}'); event.stopPropagation();"
-      style="display:inline-flex;align-items:center;gap:3px;background:rgba(108,99,255,0.13);border:1px solid rgba(108,99,255,0.25);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap;">👦 ${escHtml(k)}</span>`
-  ).join('');
+  const kids = r.enfants.map(k => {
+    const mien = isMyChild(k);
+    const par = (r.ajouts || {})[k];
+    const note = par && !mien ? ` <span style="opacity:0.65;font-weight:500;">· ${escHtml(par.par)}</span>` : '';
+    return `<span onclick="goToChild('${jsStr(k)}'); event.stopPropagation();"
+      style="display:inline-flex;align-items:center;gap:3px;background:${mien ? 'rgba(67,233,123,0.14)' : 'rgba(108,99,255,0.13)'};border:1px solid ${mien ? 'rgba(67,233,123,0.35)' : 'rgba(108,99,255,0.25)'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;color:${mien ? 'var(--accent3)' : 'var(--accent)'};cursor:pointer;white-space:nowrap;">👦 ${escHtml(k)}${note}</span>`;
+  }).join('');
 
   const joinBtn = cap.free > 0
-    ? `<button onclick="openJoinRide('${jsStr(r.id)}')" style="margin-top:8px;width:100%;padding:9px;background:rgba(67,233,123,0.14);border:1px solid rgba(67,233,123,0.35);border-radius:10px;color:var(--accent3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">👶 Mettre mon enfant (${cap.free} place${cap.free>1?'s':''})</button>`
+    ? `<button onclick="openJoinRide('${jsStr(r.id)}')" style="margin-top:8px;width:100%;padding:9px;background:rgba(67,233,123,0.14);border:1px solid rgba(67,233,123,0.35);border-radius:10px;color:var(--accent3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">👶 Inscrire un enfant (${cap.free} place${cap.free>1?'s':''})</button>`
     : `<div style="margin-top:8px;text-align:center;font-size:12px;color:var(--text-muted);">Voiture complète</div>`;
 
   return `<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ${cap.color};border-radius:10px;padding:8px 10px;margin-bottom:7px;">
@@ -1216,26 +1219,147 @@ const LIEUX_RETOUR = ['RP du Sud','P. Mairie','Bureau CPE','S. des Profs','Gare 
 // Échappement pour insertion dans une chaîne JS d'un attribut onclick
 function jsStr(s) { return String(s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 
-// ---- Identité du parent (mémorisée sur l'appareil) ----
-function getMe()  { try { return localStorage.getItem('covoit_me') || ''; } catch(e) { return ''; } }
-function setMe(n) { try { localStorage.setItem('covoit_me', n || ''); } catch(e) {} updateMeBadge(); }
+// ---- Identité : par FAMILLE, via email ou téléphone ----
+// Une famille = le champ `famille` d'un conducteur (à défaut, son nom).
+// Ses membres : tous les conducteurs de cette famille.
+// Ses enfants : ceux que driver_children rattache à l'un de ces conducteurs.
 
-function myChildren() {
-  const me = getMe();
-  if (!me) return [];
-  const dc = getDC();
-  if (dc[me]) return dc[me];
-  // Repli : recherche insensible à la casse
-  const key = Object.keys(dc).find(k => k.trim().toLowerCase() === me.trim().toLowerCase());
-  return key ? dc[key] : [];
+const normEmail = s => String(s || '').trim().toLowerCase();
+// Rapprochement des noms : sans accents, sans espaces multiples, insensible à la casse
+const normName  = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .trim().toLowerCase().replace(/\s+/g, ' ');
+const normTel   = s => String(s || '').replace(/\D/g, '').replace(/^33/, '0');
+const isEmail   = s => /@/.test(String(s || ''));
+
+// Nom de famille = les mots en MAJUSCULES du nom complet ("Virginie BOULLE" → BOULLE)
+function surnameOf(nom) {
+  return String(nom || '').trim().split(/\s+/)
+    .filter(w => w.length > 1 && w === w.toUpperCase() && /[A-ZÀ-Ý]/.test(w)).join(' ');
 }
+function famIdOf(driver) {
+  if (!driver) return '';
+  const fam = String(driver.famille || '').trim();
+  if (fam) return fam.toUpperCase();
+  return (surnameOf(driver.nom) || String(driver.nom || '').trim()).toUpperCase();
+}
+
+// Construit l'annuaire des familles.
+// Source de vérité : la liste des conducteurs (champ `famille`) et driver_children,
+// qui rattache chaque enfant à ses parents. Les noms saisis dans les fiches enfants
+// sont trop irréguliers (prénom seul, variantes) pour créer des familles : ils ne
+// servent qu'à enrichir les coordonnées d'identification.
+function buildFamilies() {
+  const drivers = getDriversData();
+  const dc = getDC();
+  const fams = {};
+  const get = id => (fams[id] = fams[id] || { id, label: id, parents: [], enfants: [], emails: [], tels: [] });
+  const addMail = (f, v) => { const e = normEmail(v); if (e && !f.emails.includes(e)) f.emails.push(e); };
+  const addTel  = (f, v) => { const t = normTel(v);   if (t && !f.tels.includes(t))   f.tels.push(t); };
+
+  // 1) Les familles viennent des conducteurs
+  drivers.forEach(d => {
+    const id = famIdOf(d);
+    if (!id) return;
+    const f = get(id);
+    if (!f.parents.includes(d.nom)) f.parents.push(d.nom);
+    addMail(f, d.email);
+    addTel(f, d.tel);
+    (dc[d.nom] || []).forEach(k => { if (!f.enfants.includes(k)) f.enfants.push(k); });
+  });
+
+  // 2) Les fiches enfants n'ajoutent que des coordonnées, aux familles déjà connues
+  DATA.children.forEach(c => {
+    let cibles = Object.values(fams).filter(f => f.enfants.includes(c.prenom));
+    if (!cibles.length) {
+      // Enfant rattaché à aucun conducteur : on crée sa famille depuis le nom du parent
+      const nom = [c.parent1_nom, c.chauffeur1].find(n => n && n !== 'nan');
+      const id = String(nom || c.nom || c.prenom).trim().toUpperCase();
+      const f = get(id);
+      if (nom && !f.parents.includes(nom)) f.parents.push(nom);
+      f.enfants.push(c.prenom);
+      cibles = [f];
+    }
+    cibles.forEach(f => {
+      addTel(f, c.parent1_tel); addTel(f, c.parent2_tel);
+      addTel(f, c.tel_chauf1);  addTel(f, c.tel_chauf2);
+      addTel(f, c.tel);
+      addMail(f, c.parent1_email); addMail(f, c.parent2_email); addMail(f, c.email);
+    });
+  });
+  return fams;
+}
+
+function familiesOfChild(prenom, fams) {
+  return Object.values(fams || buildFamilies()).filter(f => f.enfants.includes(prenom));
+}
+
+// Retrouve la famille correspondant à un email ou un numéro de téléphone
+function resolveIdentity(input) {
+  const raw = String(input || '').trim();
+  if (!raw) return null;
+  const fams = buildFamilies();
+  const email = normEmail(raw), tel = normTel(raw);
+
+  if (isEmail(raw)) {
+    const f = Object.values(fams).find(x => x.emails.includes(email));
+    return f ? { famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'email', input: email } : null;
+  }
+  if (tel.length >= 9) {
+    const f = Object.values(fams).find(x => x.tels.includes(tel));
+    return f ? { famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'tel', input: tel } : null;
+  }
+  // Repli : nom d'un conducteur (compatibilité avec l'ancienne identification)
+  const f = Object.values(fams).find(x => x.parents.some(p => normName(p) === normName(raw)));
+  return f ? { famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'nom', input: raw } : null;
+}
+
+function getIdentity() {
+  try {
+    const s = localStorage.getItem('covoit_identity');
+    if (s) {
+      const id = JSON.parse(s);
+      const fams = buildFamilies();
+      const f = fams[id.famId];
+      if (f) return { ...id, label: f.label, enfants: f.enfants, parents: f.parents };
+      return id;
+    }
+    // Migration depuis l'ancienne identification par nom
+    const old = localStorage.getItem('covoit_me');
+    if (old) {
+      const r = resolveIdentity(old);
+      if (r) { setIdentity({ ...r, who: old }); return { ...r, who: old }; }
+    }
+  } catch(e) {}
+  return null;
+}
+function setIdentity(id) {
+  try {
+    if (id) localStorage.setItem('covoit_identity', JSON.stringify(id));
+    else { localStorage.removeItem('covoit_identity'); localStorage.removeItem('covoit_me'); }
+  } catch(e) {}
+  updateMeBadge();
+}
+function isIdentified() { return !!getIdentity(); }
+
+// Nom du conducteur à pré-sélectionner
+function getMe() {
+  const id = getIdentity();
+  return (id && (id.who || (id.parents || [])[0])) || '';
+}
+// Enfants de ma famille
+function myChildren() {
+  const id = getIdentity();
+  return id ? (id.enfants || []) : [];
+}
+// Ai-je la charge de cet enfant ?
+function isMyChild(prenom) { return myChildren().includes(prenom); }
 
 // Enregistre un nouveau conducteur dans la liste partagée
 function registerDriver(nom) {
   if (!nom) return;
   const drivers = getDriversData();
   if (drivers.some(d => d.nom.trim().toLowerCase() === nom.trim().toLowerCase())) return;
-  drivers.push({ nom, tel: '', email: '', places: '', note: '', famille: '' });
+  drivers.push({ nom, tel: '', email: '', places: '', note: '', famille: surnameOf(nom) });
   saveDriversData(drivers);
   try {
     const bl = JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]').filter(n => n !== nom);
@@ -1252,30 +1376,66 @@ function allDriverNames() {
 function updateMeBadge() {
   const el = document.getElementById('me-badge');
   if (!el) return;
-  const me = getMe();
-  el.textContent = me ? '👤 ' + me.split(' ')[0] : '👤 Qui suis-je ?';
+  let id = null;
+  try { id = getIdentity(); } catch(e) {}
+  el.textContent = id ? '👪 ' + id.label : '👤 S\'identifier';
 }
 
-function openIdentity() {
-  const me = getMe();
-  const opts = allDriverNames()
-    .map(n => `<option value="${escHtml(n)}" ${n === me ? 'selected' : ''}>${escHtml(n)}</option>`).join('');
+// Demande l'identification ; renvoie false si l'utilisateur n'est pas identifié
+function requireIdentity(motif) {
+  if (isIdentified()) return true;
+  openIdentity(motif || 'Identifiez-vous pour continuer.');
+  return false;
+}
+
+function openIdentity(motif) {
+  const id = getIdentity();
   openModal(`
-    <div style="font-size:18px;font-weight:800;margin-bottom:6px;">👤 Qui êtes-vous ?</div>
-    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Mémorisé sur cet appareil : vos trajets et vos enfants seront pré-remplis.</div>
-    <select id="me-select" class="search-input" style="padding-left:14px;">
-      <option value="">— Choisir mon nom —</option>${opts}
-    </select>
-    <div style="display:flex;gap:10px;margin-top:20px;">
-      <button onclick="closeAppModal()" style="flex:1;padding:14px;background:var(--surface2);border:none;border-radius:12px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Annuler</button>
-      <button onclick="saveIdentity()" style="flex:2;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">💾 C'est moi</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-size:18px;font-weight:800;">👪 Ma famille</div>
+      <button onclick="closeAppModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+      ${motif ? escHtml(motif) + '<br>' : ''}
+      Entrez l'adresse mail d'un parent ou de l'enfant. Le numéro de téléphone déjà enregistré fonctionne aussi.
+    </div>
+    ${id ? `<div class="ride-card" style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;">Famille ${escHtml(id.label)}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${(id.enfants||[]).map(escHtml).join(' · ') || 'aucun enfant rattaché'}</div>
+    </div>` : ''}
+    <input id="ident-input" class="search-input" style="padding-left:14px;" placeholder="mon.mail@exemple.fr ou 0612345678" value="${escHtml(id ? id.input || '' : '')}">
+    <div id="ident-msg" style="margin-top:10px;font-size:12px;"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      ${id ? `<button onclick="clearIdentity()" style="flex:1;padding:14px;background:var(--surface2);border:none;border-radius:12px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Me déconnecter</button>` : ''}
+      <button onclick="submitIdentity()" style="flex:2;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Valider</button>
     </div>`);
+  const inp = document.getElementById('ident-input');
+  if (inp) { inp.focus(); inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitIdentity(); }); }
 }
 
-function saveIdentity() {
-  setMe(document.getElementById('me-select').value);
+function submitIdentity() {
+  const val = document.getElementById('ident-input').value;
+  const msg = document.getElementById('ident-msg');
+  const r = resolveIdentity(val);
+  if (!r) {
+    msg.innerHTML = '<span style="color:#ff6584;">Adresse ou numéro inconnu. Vérifiez la saisie, ou demandez à l\'administrateur d\'enregistrer votre adresse dans votre fiche.</span>';
+    return;
+  }
+  const who = (r.parents || []).find(p => {
+    const d = getDriversData().find(x => x.nom === p);
+    return d && (normEmail(d.email) === r.input || normTel(d.tel) === r.input);
+  }) || (r.parents || [])[0] || '';
+  setIdentity({ famId: r.famId, who, via: r.via, input: r.input });
   closeAppModal();
-  showToast(getMe() ? '👋 Bonjour ' + getMe().split(' ')[0] + ' !' : 'Identité effacée');
+  refreshAll();
+  showToast('👪 Famille ' + r.label + (r.enfants.length ? ' · ' + r.enfants.join(', ') : ''));
+}
+
+function clearIdentity() {
+  setIdentity(null);
+  closeAppModal();
+  refreshAll();
+  showToast('Déconnecté');
 }
 
 // ---- Modale générique ----
@@ -1295,13 +1455,20 @@ function closeAppModal() {
 // ============================================================
 function openProposeRide(sheet) {
   if (!DAYS.length) { showToast('Aucun jour disponible'); return; }
+  if (!requireIdentity('Identifiez-vous pour proposer un trajet.')) return;
   const defDay = DAYS.find(d => d.sheet === sheet) || getDefaultDay() || DAYS[0];
   const me = getMe();
+  const id = getIdentity();
+  const miens = (id && id.parents) || [];
 
   const dayOptions = DAYS.map(d =>
     `<option value="${escHtml(d.sheet)}" ${d.sheet === defDay.sheet ? 'selected' : ''}>${escHtml(d.date)}${isToday(d) ? " (aujourd'hui)" : ''}</option>`).join('');
-  const driverOptions = allDriverNames().map(n =>
-    `<option value="${escHtml(n)}" ${n === me ? 'selected' : ''}>${escHtml(n)}</option>`).join('');
+  // Les conducteurs de ma famille d'abord, puis les autres
+  const autres = allDriverNames().filter(n => !miens.includes(n));
+  const opt = n => `<option value="${escHtml(n)}" ${n === me ? 'selected' : ''}>${escHtml(n)}</option>`;
+  const driverOptions =
+    (miens.length ? `<optgroup label="Ma famille">${miens.map(opt).join('')}</optgroup>` : '') +
+    `<optgroup label="Autres conducteurs">${autres.map(opt).join('')}</optgroup>`;
 
   openModal(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -1401,8 +1568,7 @@ function renderProposeChildren() {
 
   if (!list.length) {
     grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--text-muted);">
-      ${getMe() ? 'Aucun enfant enregistré à votre nom.' : 'Indiquez votre nom (👤 en haut) pour retrouver vos enfants.'}
-      Vous pourrez les ajouter au trajet juste après.</div>`;
+      Aucun enfant rattaché à votre famille. Vous pourrez inscrire des passagers juste après la création.</div>`;
     return;
   }
   grid.innerHTML = list.map(c => {
@@ -1444,7 +1610,6 @@ function saveProposeRide() {
     direction, heure, time_group, lieu, chauffeur, enfants, places
   });
   registerDriver(chauffeur);
-  if (!getMe()) setMe(chauffeur);
 
   saveData();
   closeAppModal();
@@ -1456,28 +1621,37 @@ function saveProposeRide() {
 
 // ============================================================
 // 2) METTRE SON ENFANT DANS UN TRAJET
+// Un parent gère les enfants de sa famille ; il peut aussi dépanner
+// une autre famille, et l'appli garde alors la trace de qui a inscrit qui.
 // ============================================================
 function openJoinRide(rideId) {
   const r = DATA.rides.find(x => x.id === rideId);
   if (!r) { showToast('Trajet introuvable'); return; }
+  if (!requireIdentity('Identifiez-vous pour inscrire un enfant.')) return;
+
   const day = ALL_DAYS.find(d => d.sheet === r.sheet);
   const cap = getCapacityInfo(r);
   const taken = childrenTakenThatDay(r.sheet, r.direction, r.id);
-  const mine = myChildren().filter(c => !taken.has(c) && !r.enfants.includes(c));
-  const others = [...DATA.children]
-    .map(c => c.prenom)
-    .filter(c => !taken.has(c) && !r.enfants.includes(c) && !mine.includes(c))
+  const dispo = c => !taken.has(c) && !r.enfants.includes(c);
+  const mine = myChildren().filter(dispo);
+  const others = [...DATA.children].map(c => c.prenom)
+    .filter(c => dispo(c) && !mine.includes(c))
     .sort((a, b) => a.localeCompare(b, 'fr'));
 
   const passengers = r.enfants.length
-    ? r.enfants.map(c => `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(108,99,255,0.13);border:1px solid rgba(108,99,255,0.25);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--accent);">
-        👦 ${escHtml(childLabel(c))}
-        <span onclick="leaveRide('${jsStr(r.id)}','${jsStr(c)}')" style="cursor:pointer;color:var(--accent2);font-weight:800;" title="Retirer">×</span></span>`).join('')
+    ? r.enfants.map(c => {
+        const mien = isMyChild(c);
+        const par = (r.ajouts || {})[c];
+        const note = par && !mien ? `<span style="font-size:10px;color:var(--text-muted);">· ${escHtml(par.par)}</span>` : '';
+        return `<span style="display:inline-flex;align-items:center;gap:6px;background:${mien ? 'rgba(67,233,123,0.14)' : 'rgba(108,99,255,0.13)'};border:1px solid ${mien ? 'rgba(67,233,123,0.35)' : 'rgba(108,99,255,0.25)'};border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:${mien ? 'var(--accent3)' : 'var(--accent)'};">
+          👦 ${escHtml(childLabel(c))} ${note}
+          <span onclick="leaveRide('${jsStr(r.id)}','${jsStr(c)}')" style="cursor:pointer;color:var(--accent2);font-weight:800;" title="Retirer">×</span></span>`;
+      }).join('')
     : '<span style="font-size:12px;color:var(--text-muted);">Personne pour l\'instant</span>';
 
   openModal(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <div style="font-size:18px;font-weight:800;">👶 Mettre mon enfant</div>
+      <div style="font-size:18px;font-weight:800;">👶 Inscrire un enfant</div>
       <button onclick="closeAppModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
     </div>
 
@@ -1497,12 +1671,14 @@ function openJoinRide(rideId) {
       ${mine.length ? `<div class="info-label" style="margin-bottom:6px;">Mes enfants</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
           ${mine.map(c => `<button onclick="joinRide('${jsStr(r.id)}','${jsStr(c)}')" style="padding:9px 14px;background:rgba(67,233,123,0.14);border:1px solid rgba(67,233,123,0.35);border-radius:10px;color:var(--accent3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">+ ${escHtml(childLabel(c))}</button>`).join('')}
-        </div>` : ''}
-      <div class="info-label" style="margin-bottom:6px;">${mine.length ? 'Un autre enfant' : 'Choisir un enfant'}</div>
+        </div>` : '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Aucun enfant de votre famille disponible pour ce trajet.</div>'}
+
+      <div class="info-label" style="margin-bottom:6px;">Dépanner une autre famille</div>
       <select id="join-child" class="search-input" style="padding-left:14px;">
-        <option value="">— Sélectionner —</option>
+        <option value="">— Sélectionner un enfant —</option>
         ${others.map(c => `<option value="${escHtml(c)}">${escHtml(childLabel(c))}</option>`).join('')}
       </select>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Votre nom de famille sera indiqué à côté de l'enfant.</div>
       <button onclick="joinRide('${jsStr(r.id)}', document.getElementById('join-child').value)" style="width:100%;margin-top:12px;padding:14px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">✅ Ajouter au trajet</button>`}
 
     ${taken.size ? `<div style="margin-top:14px;font-size:11px;color:var(--text-muted);">🔒 Les enfants déjà placés dans un autre trajet ce jour-là ne sont pas proposés.</div>` : ''}
@@ -1513,18 +1689,30 @@ function joinRide(rideId, prenom) {
   if (!prenom) { alert('Choisissez un enfant.'); return; }
   const r = DATA.rides.find(x => x.id === rideId);
   if (!r) { showToast('Trajet introuvable'); return; }
+  if (!requireIdentity('Identifiez-vous pour inscrire un enfant.')) return;
   if (r.enfants.includes(prenom)) { showToast('Déjà inscrit'); return; }
   const places = r.places || 4;
-  if (r.enfants.length >= places) { alert('Voiture complète (' + places + ' place' + (places>1?'s':'') + ').'); return; }
+  if (r.enfants.length >= places) { alert('Voiture complète (' + places + ' place' + (places > 1 ? 's' : '') + ').'); return; }
+
+  const id = getIdentity();
+  if (!isMyChild(prenom)) {
+    const fam = familiesOfChild(prenom).map(f => f.label).join('/') || 'une autre famille';
+    if (!confirm(prenom + ' est de la famille ' + fam + '.\nL\'inscrire quand même ? Votre nom sera indiqué à côté.')) return;
+  }
   if (childrenTakenThatDay(r.sheet, r.direction, r.id).has(prenom)) {
     if (!confirm(prenom + ' est déjà dans un autre trajet ce jour-là. Le déplacer ici ?')) return;
     DATA.rides.forEach(o => {
       if (o.id !== r.id && o.sheet === r.sheet && o.direction === r.direction) {
         o.enfants = o.enfants.filter(e => e !== prenom);
+        if (o.ajouts) delete o.ajouts[prenom];
       }
     });
   }
+
   r.enfants.push(prenom);
+  r.ajouts = r.ajouts || {};
+  r.ajouts[prenom] = { par: id.label, qui: id.who || '', le: new Date().toISOString() };
+
   saveData();
   showToast('✅ ' + prenom + ' est inscrit !');
   refreshAll();
@@ -1535,8 +1723,16 @@ function joinRide(rideId, prenom) {
 function leaveRide(rideId, prenom) {
   const r = DATA.rides.find(x => x.id === rideId);
   if (!r) return;
-  if (!confirm('Retirer ' + prenom + ' de ce trajet ?')) return;
+  if (!requireIdentity('Identifiez-vous pour retirer un enfant.')) return;
+  const id = getIdentity();
+  const inscritParMoi = ((r.ajouts || {})[prenom] || {}).par === id.label;
+  if (!isMyChild(prenom) && !inscritParMoi) {
+    const fam = familiesOfChild(prenom).map(f => f.label).join('/') || 'une autre famille';
+    if (!confirm(prenom + ' est de la famille ' + fam + ' et n\'a pas été inscrit par vous.\nLe retirer quand même ?')) return;
+  } else if (!confirm('Retirer ' + prenom + ' de ce trajet ?')) return;
+
   r.enfants = r.enfants.filter(e => e !== prenom);
+  if (r.ajouts) delete r.ajouts[prenom];
   saveData();
   showToast('Retiré : ' + prenom);
   refreshAll();
@@ -1772,7 +1968,9 @@ function updateTodayLabel() {
   const now = new Date();
   const d = getDefaultDay();
   const jour = JOURS_FR[now.getDay()] + ' ' + now.getDate() + ' ' + MOIS_FR[now.getMonth()];
-  el.textContent = (d && isToday(d)) ? jour : jour + ' · prochain trajet ' + (d ? d.label : '—');
+  let id = null; try { id = getIdentity(); } catch(e) {}
+  const base = (d && isToday(d)) ? jour : jour + ' · prochain trajet ' + (d ? d.label : '—');
+  el.textContent = id ? base : base + ' · non identifié';
 }
 
 function renderAdminEquityTable() {
@@ -2675,7 +2873,7 @@ function buildDriverOpts(selectedNom) {
   return opts;
 }
 
-function renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, editMode) {
+function renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, editMode, p1mail, p2mail) {
   var h = '<div style="background:rgba(0,210,255,0.05);border:1px solid rgba(0,210,255,0.2);border-radius:12px;padding:10px 12px;margin-bottom:14px;">';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
   h += '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">🚗 Parents chauffeurs</div>';
@@ -2712,7 +2910,8 @@ function renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, editMode) {
       h += '<div class="info-label" style="margin-bottom:6px;">' + label + '</div>';
       h += '<select id="cf-chauf' + n + '" class="search-input" style="padding-left:10px;margin-bottom:6px;" onchange="syncParent' + n + '(this.value)">' + buildDriverOpts(selNom) + '</select>';
       h += '<input id="cf-nom' + n + '" class="search-input" style="padding-left:14px;margin-bottom:6px;" value="' + escHtml(selNom && selNom !== 'nan' ? selNom : '') + '" placeholder="Nom complet parent ' + n + '">';
-      h += '<input id="cf-tel' + n + '" class="search-input" style="padding-left:14px;" value="' + escHtml(selTel || '') + '" placeholder="Tél. parent ' + n + '">';
+      h += '<input id="cf-tel' + n + '" class="search-input" style="padding-left:14px;margin-bottom:6px;" value="' + escHtml(selTel || '') + '" placeholder="Tél. parent ' + n + '">';
+      h += '<input id="cf-mail' + n + '" class="search-input" style="padding-left:14px;" value="' + escHtml(n === '1' ? (p1mail || '') : (p2mail || '')) + '" placeholder="Mail parent ' + n + ' (pour s\'identifier)">';
       h += '</div>';
     });
   }
@@ -2734,6 +2933,8 @@ function openChildForm(idx) {
   var p2tel = c ? (c.parent2_tel || (c.tel_chauf2 !== 'nan' ? c.tel_chauf2 : '') || '') : '';
   if (p1nom === 'nan') p1nom = '';
   if (p2nom === 'nan') p2nom = '';
+  var p1mail = c ? (c.parent1_email || '') : '';
+  var p2mail = c ? (c.parent2_email || '') : '';
 
   var prenom  = c ? c.prenom : '';
   var nom     = c ? (c.nom || '') : '';
@@ -2749,7 +2950,7 @@ function openChildForm(idx) {
   html += '<button onclick="closeModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button></div>';
 
   // Section parents (vue lecture par défaut)
-  html += '<div id="cf-parents-section">' + renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, false) + '</div>';
+  html += '<div id="cf-parents-section">' + renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, false, p1mail, p2mail) + '</div>';
 
   // Champs identité enfant
   html += '<div style="display:flex;flex-direction:column;gap:12px;">';
@@ -2768,8 +2969,11 @@ function openChildForm(idx) {
   html += '<select id="cf-arret" class="search-input" style="padding-left:14px;">' + stopOpts + '</select></div>';
   html += '<div><div class="info-label" style="margin-bottom:6px;">Famille</div>';
   html += '<input id="cf-famille" class="search-input" style="padding-left:14px;" value="' + escHtml(famille || nom.toUpperCase()) + '" placeholder="ex: PEACOCK"></div></div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
   html += '<div><div class="info-label" style="margin-bottom:6px;">Tél. enfant</div>';
   html += '<input id="cf-tel" class="search-input" style="padding-left:14px;" value="' + escHtml(tel) + '" placeholder="0612345678"></div>';
+  html += '<div><div class="info-label" style="margin-bottom:6px;">Mail enfant</div>';
+  html += '<input id="cf-email" class="search-input" style="padding-left:14px;" value="' + escHtml(c && c.email ? c.email : '') + '" placeholder="prenom@exemple.fr"></div></div>';
   html += '</div>';
 
   html += '<div style="display:flex;gap:10px;margin-top:20px;">';
@@ -2784,7 +2988,7 @@ function openChildForm(idx) {
   if (btnP) {
     btnP.addEventListener('click', function(e) {
       e.stopPropagation();
-      document.getElementById('cf-parents-section').innerHTML = renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, true);
+      document.getElementById('cf-parents-section').innerHTML = renderChildParentsSection(p1nom, p1tel, p2nom, p2tel, true, p1mail, p2mail);
     });
   }
 
@@ -2811,6 +3015,8 @@ function saveChildForm() {
   const p2nom = (document.getElementById('cf-nom2').value || '').trim() || document.getElementById('cf-chauf2').value || '';
   const p1tel = document.getElementById('cf-tel1').value.trim();
   const p2tel = document.getElementById('cf-tel2').value.trim();
+  const p1mail = (document.getElementById('cf-mail1') || {}).value ? document.getElementById('cf-mail1').value.trim() : '';
+  const p2mail = (document.getElementById('cf-mail2') || {}).value ? document.getElementById('cf-mail2').value.trim() : '';
   const famille = document.getElementById('cf-famille').value.trim();
 
   const child = {
@@ -2822,6 +3028,9 @@ function saveChildForm() {
     parent2_nom: p2nom,
     parent1_tel: p1tel,
     parent2_tel: p2tel,
+    parent1_email: p1mail,
+    parent2_email: p2mail,
+    email: document.getElementById('cf-email').value.trim(),
     tel: document.getElementById('cf-tel').value.trim() || 'nan',
     chauffeur1: document.getElementById('cf-chauf1').value || p1nom || 'nan',
     tel_chauf1: p1tel || 'nan',
@@ -2846,11 +3055,15 @@ function saveChildForm() {
 
   // Propagate tel update to drivers list
   const drivers = getDriversData();
-  [{ nom: p1nom, tel: p1tel }, { nom: p2nom, tel: p2tel }].forEach(({ nom: dn, tel: dt }) => {
+  [{ nom: p1nom, tel: p1tel, email: p1mail }, { nom: p2nom, tel: p2tel, email: p2mail }].forEach(({ nom: dn, tel: dt, email: de }) => {
     if (!dn || dn === 'nan') return;
     const di = drivers.findIndex(d => d.nom === dn);
-    if (di >= 0) { if (dt && !drivers[di].tel) drivers[di].tel = dt; }
-    else if (dn) drivers.push({ nom: dn, tel: dt, places: '', email: '', note: '', famille });
+    if (di >= 0) {
+      if (dt && !drivers[di].tel) drivers[di].tel = dt;
+      if (de) drivers[di].email = de; // l'adresse saisie ici sert à l'identification
+    } else {
+      drivers.push({ nom: dn, tel: dt, places: '', email: de || '', note: '', famille });
+    }
   });
   saveDriversData(drivers);
 
