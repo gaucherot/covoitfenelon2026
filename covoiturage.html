@@ -1808,6 +1808,7 @@ function renderAdminEquityTable() {
     if (archivable) {
       archive.push({ id: r.id, sheet: r.sheet, chauffeur: r.chauffeur.trim(),
                      enfants: r.enfants, places: r.places || 4, date: rideDate.toISOString() });
+      archivedIds.add(r.id); // sinon le trajet est recompté plus bas parmi ceux du jour
       newArchived++;
     }
   });
