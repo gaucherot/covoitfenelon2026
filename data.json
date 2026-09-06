@@ -2100,7 +2100,8 @@
       "lieu": "NDF",
       "chauffeur": "Guillaume GAUCHEROT",
       "enfants": [
-        "Camille"
+        "Camille",
+        "Lucie"
       ],
       "places": 4
     }
@@ -4005,5 +4006,5 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-09-06T15:28:40.795Z"
+  "last_updated": "2026-09-06T15:28:41.659Z"
 }
