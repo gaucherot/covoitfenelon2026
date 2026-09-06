@@ -658,6 +658,11 @@ function rebuildDays() {
 // Ancien nom conservé (appelé depuis le bouton de rechargement)
 function filterPastDays() { rebuildDays(); }
 
+// Un trajet doit toujours porter un jour connu du calendrier
+function isKnownSheet(sheet) {
+  return !!String(sheet || '').trim() && ALL_DAYS.some(d => d.sheet === sheet);
+}
+
 // Jours à persister dans data.json (tout sauf les feuilles historiques "Lundi A"…)
 function extraDaysForSave() {
   return ALL_DAYS
@@ -1607,6 +1612,7 @@ function saveProposeRide() {
   const places     = parseInt(document.getElementById('p-places').value) || 4;
   let chauffeur    = document.getElementById('p-chauffeur').value;
   if (chauffeur === '__new__') chauffeur = document.getElementById('p-new-chauffeur').value.trim();
+  if (!isKnownSheet(sheet)) { alert('Veuillez choisir un jour pour ce trajet.'); return; }
   if (!chauffeur) { alert('Indiquez qui conduit.'); return; }
 
   const enfants = [...document.querySelectorAll('input[name="p_child"]:checked')].map(cb => cb.value);
@@ -2619,6 +2625,7 @@ function renderAdminRidesList(sheet, dateLabel) {
 
 // ---- RIDE FORM ----
 function openRideForm(rideId) {
+  if (!DAYS.length) { showToast('Aucun jour disponible — impossible de créer un trajet'); return; }
   editingRideId = rideId;
   const ride = rideId ? DATA.rides.find(r => r.id === rideId) : null;
   const allDrivers = [...new Set(DATA.rides.map(r => r.chauffeur))].sort();
@@ -2804,6 +2811,7 @@ function saveRideForm() {
   const enfants = [...document.querySelectorAll('input[name="child_check"]:checked')].map(cb => cb.value);
   const places = parseInt(document.getElementById('f-places').value) || 4;
 
+  if (!isKnownSheet(sheet)) { alert('Veuillez choisir un jour pour ce trajet.'); return; }
   if (!chauffeur || chauffeur === '') { alert('Veuillez sélectionner ou saisir un chauffeur.'); return; }
   if (enfants.length > places) { alert('⚠️ ' + enfants.length + ' enfants sélectionnés pour ' + places + ' place' + (places > 1 ? 's' : '') + '.\nRéduisez le nombre de passagers avant d\'enregistrer.'); return; }
 
