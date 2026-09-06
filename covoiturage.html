@@ -481,10 +481,11 @@
         <text x="54" y="12" font-size="7">⭐</text>
       </svg>
     </div>
-    <div>
+    <div style="flex:1;">
       <div class="app-title">Covoiturage Fénelon</div>
-
+      <div class="app-subtitle" id="today-label"></div>
     </div>
+    <button id="me-badge" onclick="openIdentity()" style="flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;cursor:pointer;">👤 Qui suis-je ?</button>
   </div>
 </div>
 
@@ -492,6 +493,7 @@
 <div id="screen-chauffeur" class="screen active">
 
   <div id="driver-select-view">
+    <button onclick="openProposeRide(planningDay)" style="width:100%;padding:13px;margin-bottom:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">🚗 Je propose un trajet</button>
     <div class="search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <select class="search-input" id="driver-select" onchange="loadDriverRides(this.value)">
@@ -520,6 +522,13 @@
 
 <div id="screen-admin" class="screen"></div>
 
+<!-- MODALE GLOBALE (proposer un trajet / inscrire un enfant) -->
+<div id="app-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;">
+  <div id="app-modal-scroll" style="position:absolute;inset:0;overflow-y:auto;padding:20px;">
+    <div id="app-modal-content" style="background:var(--surface);border-radius:20px;padding:24px;max-width:500px;margin:0 auto;"></div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="nav-btn active" onclick="switchTab('chauffeur')" id="nav-chauffeur">
@@ -547,7 +556,14 @@
 <script>
 const DATA = {"rides":[{"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marika MASSOUTIER", "heure": "7h20", "lieu": "P.-Lomb.", "enfants": ["Nina", "Térence", "Eyrian"], "id": "mmnqdk8cxvz3"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Rachel ROBINSON", "heure": "7h05", "lieu": "Madeleine", "enfants": ["Mila", "Matilda", "Lisa", "Cesar", "Oscar"], "id": "mmnqdk8c6pht"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Pierre COULON", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Méane", "Vanille", "Louis C", "Célia"], "id": "mmnqdk8c6j0y"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Anne Sophie SAMYN", "heure": "7h15", "lieu": "Courmettes", "enfants": ["Isaac", "Léonie"], "id": "mmnqdk8cqdrf"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Lisa VAN HELDEN", "heure": "7h05", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sidney", "Olivia"], "id": "mmnqdk8cukad"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Michon SWEET", "heure": "7h10", "lieu": "NDF", "enfants": ["Virgile", "Luca"], "id": "mmnqdk8crl8e"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Mahé GAUCHEROT", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Noah", "Lucie"], "id": "mmnqdk8cr07z"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Teiva"], "id": "mmnqdk8c9cpv"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Leonie GRANAUD", "heure": "7h10", "lieu": "Madeleine", "enfants": ["Noah", "Andy", "Lou", "Finnian"], "id": "mmnqdk8ch9k4"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "ALLER", "time_group": "10h10", "chauffeur": "Alexandra PEACOCK", "heure": "9h05", "lieu": "NDF", "enfants": ["Sophie"], "id": "mmnqdk8cvpjb"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Anne Sophie SAMYN", "heure": "", "lieu": "lycée", "enfants": ["Isaac", "Clara", "Léonie", "Vanille"], "id": "mmnqdk8c448e"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Virginie BOULLE", "heure": "", "lieu": "lycée", "enfants": ["Teiva", "Térence"], "id": "mmnqdk8crbq3"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Lisa VAN HELDEN", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sidney", "Olivia"], "id": "mmnqdk8ccl4x"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Alexandra PEACOCK", "heure": "", "lieu": "P. Mairie", "enfants": [], "id": "mmnqdk8cbj8q"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Marika MASSOUTIER", "heure": "", "lieu": "lycée", "enfants": ["Nina", "Sam", "Eyrian"], "id": "mmnqdk8czs73"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Delphine LAMARRE", "heure": "", "lieu": "P. Mairie", "enfants": ["Méane", "Louis C"], "id": "mmnqdk8c2w91"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Olivier GRANAUD", "heure": "", "lieu": "P. Mairie", "enfants": ["Mila", "Lisa", "Andy", "Lou"], "id": "mmnqdk8c92pk"}, {"sheet": "Lundi A", "day": "9", "month": "Mars", "direction": "RETOUR", "time_group": "17h20", "chauffeur": "Mahé GAUCHEROT", "heure": "", "lieu": "RDV", "enfants": ["Camille", "Noah", "Finnian", "Lucie"], "id": "mmnqdk8cfdhn"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marika MASSOUTIER", "heure": "7h20", "lieu": "Courmettes", "enfants": ["Sam", "Térence", "Eyrian"], "id": "mmnqdk8c11on"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Pierre COULON", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Côme", "Finnian"], "id": "mmnqdk8cgaod"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Rachel ROBINSON", "heure": "7h05", "lieu": "Madeleine", "enfants": ["Mila", "Matilda", "Isaac"], "id": "mmnqdk8c2srw"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Olivier TRONCHON", "heure": "7h15", "lieu": "Madeleine", "enfants": ["Lucie", "Nina", "Virgile"], "id": "mmnqdk8cl5tc"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marido DEROCHE", "heure": "7h10", "lieu": "NDF", "enfants": ["Jeanne", "Capucine", "Emma"], "id": "mmnqdk8cvrdz"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Teiva"], "id": "mmnqdk8c6o06"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h30", "lieu": "NDF", "enfants": ["Gabriel", "Valentin"], "id": "mmnqdk8cl16r"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "8h55", "chauffeur": "Olivier GRANAUD", "heure": "8h10", "lieu": "Madeleine", "enfants": ["Lou"], "id": "mmnqdk8csjhf"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "ALLER", "time_group": "10h10", "chauffeur": "Fabienne CHARLES MAC-MAHON", "heure": "9h25", "lieu": "Courmettes", "enfants": ["Clara"], "id": "mmnqdk8cot05"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Delphine LAMARRE", "heure": "", "lieu": "P. Mairie", "enfants": ["Méane", "Côme", "Finnian"], "id": "mmnqdk8ca82i"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Nicol BRUMWELL", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sidney"], "id": "mmnqdk8czipr"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Marido DEROCHE", "heure": "", "lieu": "Gare SNCF", "enfants": ["Matilda", "Andy", "Capucine"], "id": "mmnqdk8ci5mt"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Frances MOULAERT", "heure": "", "lieu": "P. Mairie", "enfants": ["Matilda", "Vanille", "Cesar", "Célia"], "id": "mmnqdk8cpubl"}, {"sheet": "Mardi A", "day": "10", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Fabienne CHARLES MAC-MAHON", "heure": "", "lieu": "lycée", "enfants": ["Clara", "Sam", "Eyrian"], "id": "mmnqdk8c1yd0"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Pierre COULON", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Matilda", "Méane", "Vanille", "Côme", "Louis C"], "id": "mmnqdk8cw6ul"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Antony NOWE", "heure": "7h15", "lieu": "Courmettes", "enfants": ["Cesar", "Isaac", "Léonie"], "id": "mmnqdk8c761a"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Nicolas MOULAERT", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Matilda", "Célia"], "id": "mmnqdk8cj17q"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Olivier TRONCHON", "heure": "7h10", "lieu": "NDF", "enfants": ["Nina", "Emma", "Virgile"], "id": "mmnqdk8cg8qh"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marido DEROCHE", "heure": "7h10", "lieu": "NDF", "enfants": ["Capucine", "Térence", "Eyrian"], "id": "mmnqdk8cik58"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Teiva"], "id": "mmnqdk8cz4ix"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Ian WALLACE", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8cp86d"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "ALLER", "time_group": "8h55", "chauffeur": "Nathalie SUDRIAL", "heure": "8h10", "lieu": "Madeleine", "enfants": ["Mila", "Lou", "Côme"], "id": "mmnqdk8chnn2"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "RETOUR", "time_group": "12h00", "chauffeur": "Pierre COULON", "heure": "", "lieu": "P. Mairie", "enfants": ["Matilda", "Méane", "Vanille", "Côme", "Louis C", "Célia"], "id": "mmnqdk8ceesu"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "RETOUR", "time_group": "12h55", "chauffeur": "Mahé GAUCHEROT", "heure": "", "lieu": "lycée", "enfants": ["Camille", "Isaac", "Emma", "Lucie"], "id": "mmnqdk8cq1y6"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "RETOUR", "time_group": "12h55", "chauffeur": "Cecile MEGY", "heure": "", "lieu": "lycée", "enfants": ["Nina"], "id": "mmnqdk8c7y5f"}, {"sheet": "Mercredi A", "day": "11", "month": "Mars", "direction": "RETOUR", "time_group": "12h55", "chauffeur": "Fabienne CHARLES MAC-MAHON", "heure": "", "lieu": "lycée", "enfants": ["Clara", "Léonie", "Sam"], "id": "mmnqdk8cho8m"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Teiva", "Lucie", "Léonie"], "id": "mmnqdk8clzjl"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Nathalie SUDRIAL", "heure": "7h10", "lieu": "Madeleine", "enfants": ["Matilda", "Vanille", "Côme", "Célia"], "id": "mmnqdk8cbmwl"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marido DEROCHE", "heure": "7h10", "lieu": "NDF", "enfants": ["Capucine", "Eyrian"], "id": "mmnqdk8cwj0v"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "David BRILLANT", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8cwsc2"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Frances MOULAERT", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Matilda", "Andy", "Lou", "Célia"], "id": "mmnqdk8cn0tt"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h30", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sidney"], "id": "mmnqdk8co1xw"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "8h55", "chauffeur": "Fabienne CHARLES MAC-MAHON", "heure": "8h15", "lieu": "Courmettes", "enfants": ["Isaac", "Sam", "Térence"], "id": "mmnqdk8cge9r"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "ALLER", "time_group": "10h10", "chauffeur": "Alexandra PEACOCK", "heure": "9h05", "lieu": "NDF", "enfants": ["Sophie"], "id": "mmnqdk8c8ug7"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Alexandra DALMASSO", "heure": "", "lieu": "P. Mairie", "enfants": ["Mila", "Lisa", "Cesar", "Célia"], "id": "mmnqdk8cc9ua"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Frances MOULAERT", "heure": "", "lieu": "P. Mairie", "enfants": ["Matilda", "Andy", "Oscar"], "id": "mmnqdk8czkwq"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Alexandra PEACOCK", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney", "Olivia"], "id": "mmnqdk8cf6gl"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Fabienne CHARLES MAC-MAHON", "heure": "", "lieu": "lycée", "enfants": ["Sam", "Térence", "Eyrian"], "id": "mmnqdk8csmj3"}, {"sheet": "Jeudi A", "day": "12", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Marido DEROCHE", "heure": "", "lieu": "Gare SNCF", "enfants": ["Camille", "Capucine", "Finnian"], "id": "mmnqdk8cbdvc"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marika MASSOUTIER", "heure": "7h20", "lieu": "P.-Lomb.", "enfants": ["Sam", "Térence", "Eyrian"], "id": "mmnqdk8couwf"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Olivier TRONCHON", "heure": "7h15", "lieu": "Madeleine", "enfants": ["Capucine", "Emma", "Virgile"], "id": "mmnqdk8cmmju"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Anne Sophie SAMYN", "heure": "7h15", "lieu": "Courmettes", "enfants": ["Cesar", "Célia"], "id": "mmnqdk8cw57r"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandra DALMASSO", "heure": "7h10", "lieu": "Madeleine", "enfants": ["Mila", "Lisa", "Andy", "Lou"], "id": "mmnqdk8cdm7i"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Michon SWEET", "heure": "7h10", "lieu": "NDF", "enfants": ["Lucie", "Emma", "Joshua", "Luca"], "id": "mmnqdk8c52h6"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Ian WALLACE", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8c9am6"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Julien MEGY", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Matilda", "Vanille", "Côme", "Nina"], "id": "mmnqdk8c3kvr"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h30", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8ccfkj"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Louise CARSON", "heure": "", "lieu": "P. Mairie", "enfants": ["Camille", "Olivia", "Noah", "Finnian", "Joshua", "Luca"], "id": "mmnqdk8ckfsi"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Leonie GRANAUD", "heure": "", "lieu": "P. Mairie", "enfants": ["Andy", "Lou"], "id": "mmnqdk8cr3z9"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Nicol BRUMWELL", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8c5io5"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Léa BERTAINA", "heure": "", "lieu": "P. Mairie", "enfants": ["Cesar", "Côme"], "id": "mmnqdk8cr7e2"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Julien MEGY", "heure": "", "lieu": "Gare SNCF", "enfants": ["Matilda", "Vanille", "Côme", "Finnian", "Célia"], "id": "mmnqdk8cz2xt"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "17h45", "chauffeur": "Alexandra DALMASSO", "heure": "", "lieu": "P. Mairie", "enfants": ["Mila", "Lisa", "Sam", "Eyrian"], "id": "mmnqdk8cqgsr"}, {"sheet": "Vendredi A", "day": "13", "month": "Mars", "direction": "RETOUR", "time_group": "18h45", "chauffeur": "Mahé GAUCHEROT", "heure": "", "lieu": "lycée", "enfants": ["Lucie"], "id": "mmnqdk8cwlf4"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marika MASSOUTIER", "heure": "7h25", "lieu": "P.-Lomb.", "enfants": ["Nina", "Louis B", "Térence", "Eyrian"], "id": "mmnqdk8cjax3"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandra DALMASSO", "heure": "", "lieu": "Départ", "enfants": ["Mila", "Lisa", "Lou", "Célia"], "id": "mmnqdk8c0zv6"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Anne Sophie SAMYN", "heure": "7h15", "lieu": "Courmettes", "enfants": ["Matilda", "Vanille", "Cesar", "Célia"], "id": "mmnqdk8c3s9p"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Isaac", "Clara", "Teiva"], "id": "mmnqdk8ca262"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Ian WALLACE", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8clega"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Mahé GAUCHEROT", "heure": "7h10", "lieu": "NDF", "enfants": ["Lucie", "Joshua", "Luca"], "id": "mmnqdk8ckxf4"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Pierre COULON", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Méane", "Louis C", "Côme"], "id": "mmnqdk8cgb5b"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h10", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8cl9zj"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "ALLER", "time_group": "8h55", "chauffeur": "Michon SWEET", "heure": "8h10", "lieu": "NDF", "enfants": ["Andy", "Capucine", "Luca"], "id": "mmnqdk8crz19"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Alexandra PEACOCK", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8cvlao"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Jerome SUDRIAL", "heure": "", "lieu": "Gare SNCF", "enfants": ["Mila", "Côme", "Louis C", "Célia"], "id": "mmnqdk8cvon0"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Louise CARSON", "heure": "", "lieu": "P. Mairie", "enfants": ["Olivia", "Noah", "Finnian", "Joshua"], "id": "mmnqdk8cg4ta"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Delphine LAMARRE", "heure": "", "lieu": "P. Mairie", "enfants": ["Méane"], "id": "mmnqdk8c4quz"}, {"sheet": "Lundi B", "day": "16", "month": "Mars", "direction": "RETOUR", "time_group": "17h20", "chauffeur": "Mahé GAUCHEROT", "heure": "", "lieu": "lycée", "enfants": ["Camille", "Léonie", "Lucie"], "id": "mmnqdk8ccd2b"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marika MASSOUTIER", "heure": "7h30", "lieu": "Courmettes", "enfants": ["Louis B", "Térence", "Eyrian"], "id": "mmnqdk8cfk5q"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Anne Sophie SAMYN", "heure": "7h15", "lieu": "Courmettes", "enfants": ["Cesar", "Côme", "Célia"], "id": "mmnqdk8cyby5"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Nathalie SUDRIAL", "heure": "7h10", "lieu": "Madeleine", "enfants": ["Lisa", "Méane", "Louis C"], "id": "mmnqdk8c071a"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Vanille", "Teiva", "Nina"], "id": "mmnqdk8cg8kc"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Mahé GAUCHEROT", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8chdvu"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marido DEROCHE", "heure": "7h10", "lieu": "NDF", "enfants": ["Capucine", "Lucie", "Emma", "Virgile"], "id": "mmnqdk8cv553"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h30", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sophie"], "id": "mmnqdk8c75v2"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Louise CARSON", "heure": "", "lieu": "P. Mairie", "enfants": ["Camille", "Olivia", "Noah", "Finnian", "Joshua"], "id": "mmnqdk8chzub"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Delphine LAMARRE", "heure": "", "lieu": "P. Mairie", "enfants": ["Méane", "Louis C"], "id": "mmnqdk8ceo00"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Nicol BRUMWELL", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8c1w22"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Léa BERTAINA", "heure": "", "lieu": "P. Mairie", "enfants": ["Mila", "Cesar", "Côme"], "id": "mmnqdk8c4okh"}, {"sheet": "Mardi B", "day": "17", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Mahé GAUCHEROT", "heure": "", "lieu": "lycée", "enfants": ["Nina", "Lucie"], "id": "mmnqdk8c2cgx"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Sylvie BERTHOULOUX", "heure": "7h25", "lieu": "Courmettes", "enfants": ["Louis B", "Térence", "Eyrian"], "id": "mmnqdk8chr05"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandra DALMASSO", "heure": "7h10", "lieu": "Madeleine", "enfants": ["Mila", "Lisa", "Andy", "Louis C"], "id": "mmnqdk8cqyb9"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Michon SWEET", "heure": "7h10", "lieu": "NDF", "enfants": ["Lucie", "Emma", "Virgile", "Luca"], "id": "mmnqdk8c798p"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Isaac", "Clara"], "id": "mmnqdk8c91rs"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Mahé GAUCHEROT", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8cum76"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Cecile MEGY", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Vanille", "Côme", "Léonie", "Nina"], "id": "mmnqdk8cqa8n"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Anne Sophie SAMYN", "heure": "7h15", "lieu": "Courmettes", "enfants": ["Matilda", "Cesar", "Célia"], "id": "mmnqdk8cdboz"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "RETOUR", "time_group": "12h00", "chauffeur": "Cecile MEGY", "heure": "", "lieu": "RP du Sud", "enfants": ["Méane", "Vanille", "Louis C", "Côme", "Nina"], "id": "mmnqdk8c4f6a"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "RETOUR", "time_group": "12h00", "chauffeur": "Frances MOULAERT", "heure": "", "lieu": "P. Mairie", "enfants": ["Matilda", "Cesar", "Célia", "Oscar", "Léonie"], "id": "mmnqdk8csddf"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "RETOUR", "time_group": "12h55", "chauffeur": "Sylvie BERTHOULOUX", "heure": "", "lieu": "lycée", "enfants": ["Louis B"], "id": "mmnqdk8ccxpd"}, {"sheet": "Mercredi B", "day": "18", "month": "Mars", "direction": "RETOUR", "time_group": "12h55", "chauffeur": "Mahé GAUCHEROT", "heure": "", "lieu": "lycée", "enfants": ["Camille", "Léonie", "Emma", "Joshua"], "id": "mmnqdk8c5f1p"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Rachel ROBINSON", "heure": "7h05", "lieu": "Madeleine", "enfants": ["Mila", "Matilda", "Lisa", "Cesar", "Andy", "Célia"], "id": "mmnqdk8c8sqd"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Teiva"], "id": "mmnqdk8cnar4"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Ian WALLACE", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8c5zqa"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Pierre COULON", "heure": "7h10", "lieu": "P.-Lomb.", "enfants": ["Andy", "Lou", "Louis C"], "id": "mmnqdk8ciq27"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marido DEROCHE", "heure": "7h10", "lieu": "NDF", "enfants": ["Capucine", "Lucie", "Emma"], "id": "mmnqdk8cqwr4"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h30", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8c0xck"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Nicol BRUMWELL", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sidney"], "id": "mmnqdk8cp7sl"}, {"sheet": "Jeudi B", "day": "19", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "David PEACOCK", "heure": "", "lieu": "lycée", "enfants": ["Sophie", "Lucie", "Emma", "Virgile"], "id": "mmnqdk8cfx9k"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Marika MASSOUTIER", "heure": "7h25", "lieu": "P.-Lomb.", "enfants": ["Lucie", "Térence", "Eyrian"], "id": "mmnqdk8c02k9"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Rachel ROBINSON", "heure": "7h05", "lieu": "Madeleine", "enfants": ["Mila", "Matilda", "Lisa", "Cesar", "Finnian", "Célia"], "id": "mmnqdk8ca106"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Olivier TRONCHON", "heure": "8h00", "lieu": "Madeleine", "enfants": ["Isaac", "Joshua", "Virgile"], "id": "mmnqdk8ch9ww", "places": 4}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Alexandre BOULLE", "heure": "7h05", "lieu": "Courmettes", "enfants": ["Clara", "Teiva"], "id": "mmnqdk8cm9gy"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "ALLER", "time_group": "8h00", "chauffeur": "Ian WALLACE", "heure": "7h10", "lieu": "NDF", "enfants": ["Camille", "Olivia", "Noah", "Finnian"], "id": "mmnqdk8cv6ru"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "ALLER", "time_group": "8h30", "chauffeur": "Lisa VAN HELDEN", "heure": "7h30", "lieu": "NDF", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8cxkn1"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "RETOUR", "time_group": "15h40", "chauffeur": "Louise CARSON", "heure": "", "lieu": "P. Mairie", "enfants": ["Camille", "Olivia", "Noah", "Finnian", "Joshua", "Luca"], "id": "mmnqdk8c7r8d"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "RETOUR", "time_group": "16h30 16h35", "chauffeur": "Alexandra PEACOCK", "heure": "", "lieu": "P. Mairie", "enfants": ["Gabriel", "Valentin", "Sophie", "Sidney"], "id": "mmnqdk8ci9h0"}, {"sheet": "Vendredi B", "day": "20", "month": "Mars", "direction": "RETOUR", "time_group": "16h50", "chauffeur": "Louise CARSON", "heure": "", "lieu": "P. Mairie", "enfants": ["Camille", "Olivia", "Noah", "Finnian", "Joshua", "Luca"], "id": "mmnqdk8c5k19"}],"children":[{"prenom": "Gabriel", "nom": "Van Helden", "tel": "", "chauffeur1": "lisa van helden", "tel_chauf1": "0684453371", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Notre Dame des Fleurs", "ecole": "primaire", "classe": "CM2I", "parent1_nom": "Lisa VAN HELDEN", "parent2_nom": "", "parent1_tel": "0684453371", "parent2_tel": ""}, {"prenom": "Valentin", "nom": "Van Helden", "tel": "", "chauffeur1": "lisa van helden", "tel_chauf1": "0684453371", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Notre Dame des Fleurs", "ecole": "primaire", "classe": "CM2I", "parent1_nom": "Lisa VAN HELDEN", "parent2_nom": "", "parent1_tel": "0684453371", "parent2_tel": ""}, {"prenom": "Sophie", "nom": "Peacock", "tel": "", "chauffeur1": "Alexandra Peacock", "tel_chauf1": "0782592320", "chauffeur2": "David Peacock", "tel_chauf2": "0651468494", "arret": "Notre Dame des Fleurs", "ecole": "primaire", "classe": "CM2I", "parent1_nom": "Alexandra PEACOCK", "parent2_nom": "David PEACOCK", "parent1_tel": "0782592320", "parent2_tel": "0651468494"}, {"prenom": "Sidney", "nom": "Brumwell", "tel": "", "chauffeur1": "Brumwell Nicol", "tel_chauf1": "0664178660", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Notre Dame des Fleurs", "ecole": "primaire", "classe": "CM", "parent1_nom": "Nicol BRUMWELL", "parent2_nom": "", "parent1_tel": "0664178660", "parent2_tel": ""}, {"prenom": "Mila", "nom": "Robinson", "tel": "", "chauffeur1": "Rachel", "tel_chauf1": "0650349578", "chauffeur2": "Esteban Lefebvre", "tel_chauf2": "0687746704", "arret": "Madeleine", "ecole": "collège", "classe": "6I", "parent1_nom": "Rachel ROBINSON", "parent2_nom": "", "parent1_tel": "0650349578", "parent2_tel": "0687746704"}, {"prenom": "Matilda", "nom": "Moulaert", "tel": "695432025", "chauffeur1": "Frances", "tel_chauf1": "0627884141", "chauffeur2": "Nicolas", "tel_chauf2": "0627884141", "arret": "Pie Lombard", "ecole": "collège", "classe": "6J", "parent1_nom": "Frances MOULAERT", "parent2_nom": "Nicolas MOULAERT", "parent1_tel": "0627884141", "parent2_tel": "0627884141"}, {"prenom": "Lisa", "nom": "Dalmasso", "tel": "0768776694", "chauffeur1": "Alexandra Dalmasso", "tel_chauf1": "0614707946", "chauffeur2": "Julien Dalmasso", "tel_chauf2": "0622373573", "arret": "Madeleine", "ecole": "collège", "classe": "6C", "parent1_nom": "Alexandra DALMASSO", "parent2_nom": "", "parent1_tel": "0614707946", "parent2_tel": "0622373573"}, {"prenom": "Jeanne", "nom": "Brega", "famille": "BREGA", "classe": "6A", "ecole": "collège", "arret": "Notre Dame des Fleurs", "parent1_nom": "Cecile BREGA", "parent2_nom": "", "parent1_tel": "0610206353", "parent2_tel": "", "tel": "nan", "chauffeur1": "Cecile BREGA", "tel_chauf1": "0610206353", "chauffeur2": "nan", "tel_chauf2": "nan"}, {"prenom": "Camille", "nom": "Gaucherot", "famille": "GAUCHEROT", "classe": "5I", "ecole": "collège", "arret": "Notre Dame des Fleurs", "parent1_nom": "Mahé GAUCHEROT", "parent2_nom": "Guillaume GAUCHEROT", "parent1_tel": "0658052851", "parent2_tel": "0612310118", "tel": "0745295750", "chauffeur1": "Mahé GAUCHEROT", "tel_chauf1": "0658052851", "chauffeur2": "Guillaume GAUCHEROT", "tel_chauf2": "0612310118"}, {"prenom": "Olivia", "nom": "Van Helden", "tel": "0695907799", "chauffeur1": "lisa van helden", "tel_chauf1": "0684453371", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Notre Dame des Fleurs", "ecole": "collège", "classe": "5I", "parent1_nom": "Lisa VAN HELDEN", "parent2_nom": "", "parent1_tel": "0684453371", "parent2_tel": ""}, {"prenom": "Méane", "nom": "Lamare Perrin", "famille": "LAMARE PERRIN", "classe": "5B", "ecole": "collège", "arret": "Madeleine", "parent1_nom": "Delphine LAMARRE", "parent2_nom": "", "parent1_tel": "0668807078", "parent2_tel": "", "tel": "0763329283", "chauffeur1": "Delphine LAMARRE", "tel_chauf1": "0668807078", "chauffeur2": "nan", "tel_chauf2": "nan"}, {"prenom": "Vanille", "nom": "Megy", "tel": "0685808958", "chauffeur1": "Cecile Megy", "tel_chauf1": "0616225831", "chauffeur2": "Julien Megy", "tel_chauf2": "0675980322", "arret": "Pie Lombard", "ecole": "collège", "classe": "5A", "parent1_nom": "Cecile MEGY", "parent2_nom": "Julien MEGY", "parent1_tel": "0610206323", "parent2_tel": "0675980322"}, {"prenom": "Noah", "nom": "Carson/brillant", "tel": "0686776638", "chauffeur1": "Louise Carson", "tel_chauf1": "0679551488", "chauffeur2": "David Brillant", "tel_chauf2": "0622730205", "arret": "Notre Dame des Fleurs", "ecole": "collège", "classe": "5I", "parent1_nom": "Louise CARSON", "parent2_nom": "David BRILLANT", "parent1_tel": "0679551488", "parent2_tel": "0622730205"}, {"prenom": "Cesar", "nom": "Samyn", "famille": "SAMYN", "classe": "5J", "ecole": "collège", "arret": "Courmettes", "parent1_nom": "Anne Sophie SAMYN", "parent2_nom": "Anthony SAMYN", "parent1_tel": "0786257419", "parent2_tel": "0786212904", "tel": "0652601600", "chauffeur1": "Anne Sophie SAMYN", "tel_chauf1": "0786257419", "chauffeur2": "Anthony SAMYN", "tel_chauf2": "0786212904"}, {"prenom": "Andy", "nom": "Granaud", "tel": "0611866708", "chauffeur1": "Léonie Granaud", "tel_chauf1": "0629454231", "chauffeur2": "Olivier GRANAUD", "tel_chauf2": "0661014731", "arret": "Madeleine", "ecole": "collège", "classe": "4J", "parent1_nom": "Leonie Granaud", "parent2_nom": "Olivier Granaud", "parent1_tel": "0629454231", "parent2_tel": "0661014731"}, {"prenom": "Lou", "nom": "Granaud", "tel": "0627677188", "chauffeur1": "Léonie Granaud", "tel_chauf1": "0629454231", "chauffeur2": "Olivier GRANAUD", "tel_chauf2": "0661014731", "arret": "Madeleine", "ecole": "collège", "classe": "6J", "parent1_nom": "Leonie Granaud", "parent2_nom": "Olivier Granaud", "parent1_tel": "0629454231", "parent2_tel": "0661014731"}, {"prenom": "Côme", "nom": "Bertaina", "famille": "BERTAINA", "classe": "4I", "ecole": "collège", "arret": "Pie Lombard", "parent1_nom": "Léa BERTAINA", "parent2_nom": "Julien BERTAINA", "parent1_tel": "0625556752", "parent2_tel": "0609282659", "tel": "0778090782", "chauffeur1": "Léa BERTAINA", "tel_chauf1": "0625556752", "chauffeur2": "Julien BERTAINA", "tel_chauf2": "0609282659"}, {"prenom": "Louis C", "nom": "Coulon", "famille": "COULON", "classe": "5E", "ecole": "collège", "arret": "Madeleine", "parent1_nom": "Pierre COULON", "parent2_nom": "Laurie COULON", "parent1_tel": "0786115198", "parent2_tel": "0670726826", "tel": "0681818458", "chauffeur1": "Pierre COULON", "tel_chauf1": "0786115198", "chauffeur2": "Laurie COULON", "tel_chauf2": "0670726826"}, {"prenom": "Finnian", "nom": "Wallace", "famille": "WALLACE", "classe": "5I", "ecole": "collège", "arret": "Notre Dame des Fleurs", "parent1_nom": "Ian WALLACE", "parent2_nom": "", "parent1_tel": "0789702568", "parent2_tel": "", "tel": "0669374223", "chauffeur1": "Ian WALLACE", "tel_chauf1": "0789702568", "chauffeur2": "nan", "tel_chauf2": "nan"}, {"prenom": "Célia", "nom": "Sudrial", "tel": "0611903697", "chauffeur1": "jerome sudrial", "tel_chauf1": "0673780308", "chauffeur2": "nathalie sudrial", "tel_chauf2": "0784484618", "arret": "Madeleine", "ecole": "collège", "classe": "5C", "parent1_nom": "Jerome SUDRIAL", "parent2_nom": "Nathalie SUDRIAL", "parent1_tel": "0673780308", "parent2_tel": "0784484618"}, {"prenom": "Oscar", "nom": "Moulaert", "tel": "0768585615", "chauffeur1": "Frances", "tel_chauf1": "0627884141", "chauffeur2": "Nicolas", "tel_chauf2": "0627884141", "arret": "Courmettes", "ecole": "collège", "classe": "5J", "parent1_nom": "Frances MOULAERT", "parent2_nom": "Nicolas MOULAERT", "parent1_tel": "0627884141", "parent2_tel": "0627884141"}, {"prenom": "Capucine", "nom": "Deroche", "famille": "DEROCHE", "classe": "3", "ecole": "lycée (incl. 3ème)", "arret": "Notre Dame des Fleurs", "parent1_nom": "Marido DEROCHE", "parent2_nom": "Didier DEROCHE", "parent1_tel": "0622257216", "parent2_tel": "0613760986", "tel": "0787510252", "chauffeur1": "Marido DEROCHE", "tel_chauf1": "0622257216", "chauffeur2": "Didier DEROCHE", "tel_chauf2": "0613760986"}, {"prenom": "Isaac", "nom": "Robinson", "tel": "0764307821", "chauffeur1": "rachel", "tel_chauf1": "0650349578", "chauffeur2": "Lefebvre Esteban", "tel_chauf2": "0687746704", "arret": "Madeleine", "ecole": "lycée (incl. 3ème)", "classe": "3I", "parent1_nom": "Rachel ROBINSON", "parent2_nom": "", "parent1_tel": "0650349578", "parent2_tel": "0687746704"}, {"prenom": "Clara", "nom": "Charles McMahon", "tel": "0788058777", "chauffeur1": "Fabienne", "tel_chauf1": "0770152962", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Courmettes", "ecole": "lycée (incl. 3ème)", "classe": "3I", "parent1_nom": "Fabienne CHARLES MAC-MAHON", "parent2_nom": "", "parent1_tel": "0770152962", "parent2_tel": ""}, {"prenom": "Teiva", "nom": "Boulle", "famille": "BOULLE", "classe": "3E", "ecole": "lycée (incl. 3ème)", "arret": "Courmettes", "parent1_nom": "Alexandre BOULLE", "parent2_nom": "Virginie BOULLE", "parent1_tel": "0788570313", "parent2_tel": "0785304459", "tel": "0640792797", "chauffeur1": "Alexandre BOULLE", "tel_chauf1": "0788570313", "chauffeur2": "Virginie BOULLE", "tel_chauf2": "0785304459"}, {"prenom": "Léonie", "nom": "Samyn", "famille": "SAMYN", "classe": "3I", "ecole": "lycée (incl. 3ème)", "arret": "Courmettes", "parent1_nom": "Anne Sophie SAMYN", "parent2_nom": "Anthony SAMYN", "parent1_tel": "0786257419", "parent2_tel": "0786212904", "tel": "0782653404", "chauffeur1": "Anne Sophie SAMYN", "tel_chauf1": "0786257419", "chauffeur2": "Anthony SAMYN", "tel_chauf2": "0786212904"}, {"prenom": "Lucie", "nom": "Gaucherot", "famille": "GAUCHEROT", "classe": "2I", "ecole": "lycée (incl. 3ème)", "arret": "Notre Dame des Fleurs", "parent1_nom": "Mahé GAUCHEROT", "parent2_nom": "Guillaume GAUCHEROT", "parent1_tel": "0612310118", "parent2_tel": "0612310118", "tel": "0768784140", "chauffeur1": "Mahé GAUCHEROT", "tel_chauf1": "0612310118", "chauffeur2": "Guillaume GAUCHEROT", "tel_chauf2": "0612310118"}, {"prenom": "Nina", "nom": "Megy", "tel": "0684460664", "chauffeur1": "Cecile Megy", "tel_chauf1": "0616225831", "chauffeur2": "Julien Megy", "tel_chauf2": "0675980322", "arret": "Pie Lombard", "ecole": "lycée (incl. 3ème)", "classe": "2A", "parent1_nom": "Cecile MEGY", "parent2_nom": "Julien MEGY", "parent1_tel": "0610206323", "parent2_tel": "0675980322"}, {"prenom": "Emma", "nom": "Peacock", "tel": "0768644741", "chauffeur1": "Alexandra Peacock", "tel_chauf1": "0782592320", "chauffeur2": "David Peacock", "tel_chauf2": "0651468494", "arret": "Notre Dame des Fleurs", "ecole": "lycée (incl. 3ème)", "classe": "2J", "parent1_nom": "Alexandra PEACOCK", "parent2_nom": "David PEACOCK", "parent1_tel": "0782592320", "parent2_tel": "0651468494"}, {"prenom": "Virgile", "nom": "Tronchon", "famille": "TRONCHON", "classe": "2J", "ecole": "lycée (incl. 3ème)", "arret": "Courmettes", "parent1_nom": "Olivier TRONCHON", "parent2_nom": "", "parent1_tel": "0630434037", "parent2_tel": "", "tel": "0635156759", "chauffeur1": "Olivier TRONCHON", "tel_chauf1": "0630434037", "chauffeur2": "nan", "tel_chauf2": "nan"}, {"prenom": "Louis B", "nom": "Berthouloux", "famille": "BERTHOULOUX", "classe": "1J", "ecole": "lycée (incl. 3ème)", "arret": "Courmettes", "parent1_nom": "Sylvie BERTHOULOUX", "parent2_nom": "Sylvie BERTHOULOUX", "parent1_tel": "0631243376", "parent2_tel": "0631243376", "tel": "0749923634", "chauffeur1": "Sylvie BERTHOULOUX", "tel_chauf1": "0631243376", "chauffeur2": "Sylvie BERTHOULOUX", "tel_chauf2": "0631243376"}, {"prenom": "Joshua", "nom": "Carson/brillant", "tel": "0672918095", "chauffeur1": "Louise Carson", "tel_chauf1": "0679551488", "chauffeur2": "David Brillant", "tel_chauf2": "0622730205", "arret": "Notre Dame des Fleurs", "ecole": "lycée (incl. 3ème)", "classe": "1J", "parent1_nom": "Louise CARSON", "parent2_nom": "David BRILLANT", "parent1_tel": "0679551488", "parent2_tel": "0622730205"}, {"prenom": "Luca", "nom": "Sweet", "tel": "0782224529", "chauffeur1": "Michon", "tel_chauf1": "0781882532", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Notre Dame des Fleurs", "ecole": "lycée (incl. 3ème)", "classe": "2I", "parent1_nom": "Michon SWEET", "parent2_nom": "", "parent1_tel": "0781882532", "parent2_tel": ""}, {"prenom": "Térence", "nom": "Massoutier", "famille": "MASSOUTIER", "classe": "2B", "ecole": "lycée (incl. 3ème)", "arret": "Pie Lombard", "parent1_nom": "Marika MASSOUTIER", "parent2_nom": "Frederic MASSOUTIER", "parent1_tel": "0621207920", "parent2_tel": "0621207920", "tel": "0622744138", "chauffeur1": "Marika MASSOUTIER", "tel_chauf1": "0621207920", "chauffeur2": "Frederic MASSOUTIER", "tel_chauf2": "0621207920"}, {"prenom": "Sam", "nom": "Charles McMahon", "tel": "0770152874", "chauffeur1": "Fabienne", "tel_chauf1": "0770152962", "chauffeur2": "nan", "tel_chauf2": "nan", "arret": "Courmettes", "ecole": "lycée (incl. 3ème)", "classe": "T I", "parent1_nom": "Fabienne CHARLES MAC-MAHON", "parent2_nom": "", "parent1_tel": "0770152962", "parent2_tel": ""}, {"prenom": "Eyrian", "nom": "Massoutier", "famille": "MASSOUTIER", "classe": "T I", "ecole": "lycée (incl. 3ème)", "arret": "Pie Lombard", "parent1_nom": "Marika MASSOUTIER", "parent2_nom": "Frederic MASSOUTIER", "parent1_tel": "0621207920", "parent2_tel": "0621207920", "tel": "0768220012", "chauffeur1": "Marika MASSOUTIER", "tel_chauf1": "0621207920", "chauffeur2": "Frederic MASSOUTIER", "tel_chauf2": "0621207920"}]};
 
-let DAYS = [
+// ============================================================
+// MOTEUR DE DATES
+// ALL_DAYS = catalogue complet (historique + semaines à venir)
+// DAYS     = fenêtre visible : d'aujourd'hui jusqu'à 2 semaines
+// L'application génère elle-même les jours manquants, donc la
+// date du jour est TOUJOURS disponible et sélectionnée par défaut.
+// ============================================================
+const LEGACY_DAYS = [
   {sheet:'Lundi A',    label:'Lun 9/3',  date:'Lundi 9 mars',     dateObj:new Date(2026,2,9)},
   {sheet:'Mardi A',   label:'Mar 10/3', date:'Mardi 10 mars',    dateObj:new Date(2026,2,10)},
   {sheet:'Mercredi A',label:'Mer 11/3', date:'Mercredi 11 mars', dateObj:new Date(2026,2,11)},
@@ -559,54 +575,101 @@ let DAYS = [
   {sheet:'Jeudi B',   label:'Jeu 19/3', date:'Jeudi 19 mars',    dateObj:new Date(2026,2,19)},
   {sheet:'Vendredi B',label:'Ven 20/3', date:'Vendredi 20 mars', dateObj:new Date(2026,2,20)},
 ];
+const LEGACY_SHEETS = new Set(LEGACY_DAYS.map(d => d.sheet));
 
-// Filter out days strictly before today (keep today and future)
-function filterPastDays() {
-  const now = new Date();
-  const today = new Date(now); today.setHours(0,0,0,0);
+let ALL_DAYS = [];
+let DAYS     = [];
 
-  // Trouver le lundi de référence :
-  // - Lun-Ven : lundi de la semaine courante
-  // - Sam-Dim : lundi de la semaine SUIVANTE (on anticipe)
-  const dow = today.getDay(); // 0=dim, 1=lun ... 6=sam
-  let monday = new Date(today);
-  if (dow === 0) {
-    // Dimanche : lundi dans 1 jour
-    monday.setDate(today.getDate() + 1);
-  } else if (dow === 6) {
-    // Samedi : lundi dans 2 jours
-    monday.setDate(today.getDate() + 2);
-  } else {
-    // Lundi-Vendredi : lundi de cette semaine
-    monday.setDate(today.getDate() - (dow - 1));
-  }
+const JOURS_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MOIS_FR  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 
-  // Fenêtre : 2 semaines à partir du lundi de référence
-  // + 1 semaine supplémentaire si vendredi >= 20h
-  const isFriday = dow === 5;
-  const isAfter20h = now.getHours() >= 20;
-  const extraWeek = (isFriday && isAfter20h) ? 7 : 0;
-  const limit = new Date(monday);
-  limit.setDate(monday.getDate() + 14 + extraWeek);
-
-  // Garder les jours >= aujourd'hui ET dans la fenêtre
-  DAYS = DAYS.filter(d => d.dateObj >= today && d.dateObj < limit);
+// Minuit local, quelle que soit la forme reçue (Date, 'YYYY-MM-DD', ISO complet)
+function toLocalDate(v) {
+  if (v instanceof Date) return isNaN(v) ? null : new Date(v.getFullYear(), v.getMonth(), v.getDate());
+  const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  const d = new Date(v);
+  return isNaN(d) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function dayKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function makeDay(date) {
+  const jour = JOURS_FR[date.getDay()];
+  return {
+    sheet:   dayKey(date),
+    label:   jour.slice(0, 3) + ' ' + date.getDate() + '/' + (date.getMonth() + 1),
+    date:    jour + ' ' + date.getDate() + ' ' + MOIS_FR[date.getMonth()],
+    dateObj: date
+  };
 }
 
-// Build a DAYS entry from a JS Date
+// Ajoute des jours au catalogue (dédoublonnés, dateObj toujours normalisé en Date)
+function registerDays(list) {
+  (list || []).forEach(d => {
+    if (!d) return;
+    const dt = toLocalDate(d.dateObj || d.sheet);
+    if (!dt) return;
+    const sheet = d.sheet || dayKey(dt);
+    const existing = ALL_DAYS.find(x => x.sheet === sheet);
+    if (existing) { existing.dateObj = dt; return; }
+    const gen = makeDay(dt);
+    ALL_DAYS.push({ sheet, label: d.label || gen.label, date: d.date || gen.date, dateObj: dt });
+  });
+  ALL_DAYS.sort((a, b) => a.dateObj - b.dateObj);
+}
 
-// Add next Mon–Fri week to DAYS
+// Fenêtre affichée : à partir d'aujourd'hui, 2 semaines
+// (le week-end on anticipe sur la semaine suivante ; +1 semaine dès vendredi 20h)
+function dayWindow() {
+  const now   = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dow   = today.getDay(); // 0 = dimanche
+  const monday = new Date(today);
+  if (dow === 0)      monday.setDate(today.getDate() + 1);
+  else if (dow === 6) monday.setDate(today.getDate() + 2);
+  else                monday.setDate(today.getDate() - (dow - 1));
+  const extraWeek = (dow === 5 && now.getHours() >= 20) ? 7 : 0;
+  const limit = new Date(monday);
+  limit.setDate(monday.getDate() + 14 + extraWeek);
+  return { today, monday, limit };
+}
 
-// Load extra weeks from localStorage
+// Garantit qu'il existe une entrée pour chaque jour ouvré de la fenêtre,
+// même si data.json n'a pas encore été mis à jour.
+function ensureDaysCoverage() {
+  const { today, limit } = dayWindow();
+  const cur = new Date(today);
+  while (cur < limit) {
+    const dow = cur.getDay();
+    if (dow >= 1 && dow <= 5 && !ALL_DAYS.some(d => d.sheet === dayKey(cur))) {
+      registerDays([makeDay(new Date(cur))]);
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+}
+
+// Recalcule la fenêtre visible
+function rebuildDays() {
+  ensureDaysCoverage();
+  const { today, limit } = dayWindow();
+  DAYS = ALL_DAYS.filter(d => d.dateObj >= today && d.dateObj < limit);
+}
+// Ancien nom conservé (appelé depuis le bouton de rechargement)
+function filterPastDays() { rebuildDays(); }
+
+// Jours à persister dans data.json (tout sauf les feuilles historiques "Lundi A"…)
+function extraDaysForSave() {
+  return ALL_DAYS
+    .filter(d => !LEGACY_SHEETS.has(d.sheet))
+    .map(d => ({ sheet: d.sheet, label: d.label, date: d.date, dateObj: dayKey(d.dateObj) + 'T00:00:00.000Z' }));
+}
+
+// Charge les semaines mémorisées localement
 function loadExtraDays() {
   try {
     const saved = localStorage.getItem('covoit_extra_days');
-    if (!saved) return;
-    const extra = JSON.parse(saved);
-    extra.forEach(d => {
-      d.dateObj = new Date(d.dateObj);
-      if (!DAYS.find(x => x.sheet === d.sheet)) DAYS.push(d);
-    });
+    if (saved) registerDays(JSON.parse(saved));
   } catch(e) {}
 }
 
@@ -636,16 +699,19 @@ function buildCD(dc) {
 }
 const PREFILLED_DRIVERS = [{"nom": "Léa BERTAINA", "tel": "0625556752", "email": "", "places": "", "note": "", "famille": "BERTAINA"}, {"nom": "Sylvie BERTHOULOUX", "tel": "0631243376", "email": "", "places": "", "note": "", "famille": "BERTHOULOUX"}, {"nom": "Alexandre BOULLE", "tel": "0788570313", "email": "", "places": "", "note": "", "famille": "BOULLE"}, {"nom": "David BRILLANT", "tel": "0622730205", "email": "", "places": "", "note": "", "famille": "BRILLANT/CARSON"}, {"nom": "Nicol BRUMWELL", "tel": "0664178660", "email": "", "places": "", "note": "", "famille": "BRUMWELL"}, {"nom": "Louise CARSON", "tel": "0679551488", "email": "", "places": "", "note": "", "famille": "BRILLANT/CARSON"}, {"nom": "Pierre COULON", "tel": "0786115198", "email": "", "places": "", "note": "", "famille": "COULON"}, {"nom": "Alexandra DALMASSO", "tel": "0614707946", "email": "", "places": "", "note": "", "famille": "DALMASSO"}, {"nom": "Marido DEROCHE", "tel": "0622257216", "email": "", "places": "", "note": "", "famille": "DEROCHE"}, {"nom": "Mahé GAUCHEROT", "tel": "0612310118", "email": "", "places": "4", "note": "", "famille": "GAUCHEROT"}, {"nom": "Leonie GRANAUD", "tel": "0629454231", "email": "", "places": "", "note": "", "famille": "GRANAUD"}, {"nom": "Olivier GRANAUD", "tel": "0661014731", "email": "", "places": "", "note": "", "famille": "GRANAUD"}, {"nom": "Lisa VAN HELDEN", "tel": "0684453371", "email": "", "places": "", "note": "", "famille": "VAN HELDEN"}, {"nom": "Delphine LAMARRE", "tel": "0668807078", "email": "", "places": "", "note": "", "famille": "LAMARRE"}, {"nom": "Fabienne CHARLES MAC-MAHON", "tel": "0770152962", "email": "", "places": "", "note": "", "famille": "CHARLES MAC-MAHON"}, {"nom": "Marika MASSOUTIER", "tel": "0621207920", "email": "", "places": "", "note": "", "famille": "MASSOUTIER"}, {"nom": "Cecile MEGY", "tel": "0610206323", "email": "", "places": "", "note": "", "famille": "MEGY"}, {"nom": "Julien MEGY", "tel": "0675980322", "email": "", "places": "", "note": "", "famille": "MEGY"}, {"nom": "Frances MOULAERT", "tel": "0627884141", "email": "", "places": "", "note": "", "famille": "MOULAERT"}, {"nom": "Nicolas MOULAERT", "tel": "0627884141", "email": "", "places": "", "note": "", "famille": "MOULAERT"}, {"nom": "Alexandra PEACOCK", "tel": "0782592320", "email": "", "places": "", "note": "", "famille": "PEACOCK"}, {"nom": "David PEACOCK", "tel": "0651468494", "email": "", "places": "", "note": "", "famille": "PEACOCK"}, {"nom": "Rachel ROBINSON", "tel": "0650349578", "email": "", "places": "", "note": "", "famille": "ROBINSON"}, {"nom": "Anne Sophie SAMYN", "tel": "0786257419", "email": "", "places": "", "note": "", "famille": "SAMYN"}, {"nom": "Jerome SUDRIAL", "tel": "0673780308", "email": "", "places": "", "note": "", "famille": "SUDRIAL"}, {"nom": "Nathalie SUDRIAL", "tel": "0784484618", "email": "", "places": "", "note": "", "famille": "SUDRIAL"}, {"nom": "Michon SWEET", "tel": "0781882532", "email": "", "places": "", "note": "", "famille": "SWEET"}, {"nom": "Ian WALLACE", "tel": "0789702568", "email": "", "places": "", "note": "", "famille": "WALLACE"}, {"nom": "Olivier TRONCHON", "tel": "0630434037", "places": "4", "email": "", "note": "", "famille": "TRONCHON"}, {"nom": "Anthony SAMYN", "tel": "0786212904", "places": "4", "email": "", "note": "", "famille": "SAMYN"}, {"nom": "Julien BERTAINA", "tel": "0609282659", "places": "4", "email": "", "note": "", "famille": "BERTAINA"}, {"nom": "Thierry BERTHOULOUX", "tel": "0631243376", "places": "", "email": "", "note": "", "famille": "BERTHOULOUX"}, {"nom": "Laurie COULON", "tel": "0670726826", "places": "4", "email": "", "note": "", "famille": "COULON"}, {"nom": "Julien DALMASSO", "tel": "0622373573", "places": "4", "email": "", "note": "", "famille": "DALMASSO"}, {"nom": "Didier DEROCHE", "tel": "0613760986", "places": "4", "email": "", "note": "", "famille": "DEROCHE"}, {"nom": "Guillaume GAUCHEROT", "tel": "0612310118", "places": "4", "email": "", "note": "", "famille": "GAUCHEROT"}, {"nom": "Frederic MASSOUTIER", "tel": "0621207920", "places": "4", "email": "", "note": "", "famille": "MASSOUTIER"}, {"nom": "Cecile BREGA", "tel": "0610206353", "places": "4", "email": "", "note": "", "famille": "BREGA"}];
 
+// Index du jour courant dans DAYS (sinon le prochain jour disponible)
 function getTodayIndex() {
+  if (!DAYS.length) return -1;
   const today = new Date(); today.setHours(0,0,0,0);
-  // Exact date match via dateObj
-  let idx = DAYS.findIndex(d => d.dateObj && d.dateObj.getTime() === today.getTime());
-  if (idx >= 0) return idx;
-  // Find nearest future day
-  for (let i = 0; i < DAYS.length; i++) {
-    if (DAYS[i].dateObj && DAYS[i].dateObj >= today) return i;
-  }
-  return DAYS.length - 1; // fallback: last day
+  const exact = DAYS.findIndex(d => d.dateObj && d.dateObj.getTime() === today.getTime());
+  if (exact >= 0) return exact;
+  const next = DAYS.findIndex(d => d.dateObj && d.dateObj >= today);
+  return next >= 0 ? next : 0;
+}
+// Jour sélectionné par défaut (aujourd'hui, ou le prochain jour d'école)
+function getDefaultDay() {
+  const idx = getTodayIndex();
+  return idx >= 0 ? DAYS[idx] : null;
 }
 
 
@@ -700,76 +766,12 @@ function switchTab(tab) {
     document.getElementById('screen-' + t).classList.toggle('active', t === tab);
     document.getElementById('nav-' + t).classList.toggle('active', t === tab);
   });
-  if (tab === 'planning') {
-    if (!document.querySelector('#day-tabs-planning .day-tab')) {
-      initPlanning();
-    } else {
-      // Re-render the currently active day to pick up any data changes
-      const activeTab = document.querySelector('#day-tabs-planning .day-tab.active');
-      if (activeTab) {
-        const idx = [...document.querySelectorAll('#day-tabs-planning .day-tab')].indexOf(activeTab);
-        if (idx >= 0) renderPlanning(DAYS[idx].sheet, DAYS[idx].date);
-      }
-    }
-  }
-  if (tab === 'chauffeur' && !document.querySelector('#day-tabs-driver .day-tab')) initDriverDayTabs();
+  if (tab === 'planning') initPlanning();
   if (tab === 'admin') renderAdminHome();
+  window.scrollTo({ top: 0 });
 }
 
 // ---- DRIVER VIEW ----
-let driverView = 'select';
-function setDriverView(v) {
-  driverView = v;
-  document.getElementById('driver-select-view').style.display = v === 'select' ? '' : 'none';
-  document.getElementById('driver-list-view').style.display = v === 'list' ? '' : 'none';
-  document.getElementById('dv-select').classList.toggle('active', v === 'select');
-  document.getElementById('dv-list').classList.toggle('active', v === 'list');
-  if (v === 'list') initDriverDayTabs();
-}
-
-function initDriverDayTabs() {
-  const container = document.getElementById('day-tabs-driver');
-  if (!container) return;
-  if (container.children.length) return;
-  const todayIdx = getTodayIndex();
-  DAYS.forEach((d, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'day-tab' + (i === todayIdx ? ' active' : '');
-    btn.textContent = d.label;
-    btn.onclick = () => {
-      container.querySelectorAll('.day-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderDayRides(d.sheet, d.date);
-    };
-    container.appendChild(btn);
-  });
-  renderDayRides(DAYS[todayIdx].sheet, DAYS[todayIdx].date);
-  // Scroll active tab into view
-  setTimeout(() => container.querySelectorAll('.day-tab')[todayIdx]?.scrollIntoView({inline:'center', behavior:'smooth'}), 50);
-}
-
-function renderDayRides(sheet, dateLabel) {
-  const rides = DATA.rides.filter(r => r.sheet === sheet && r.enfants.length > 0);
-  const container = document.getElementById('day-rides');
-  if (!rides.length) { container.innerHTML = '<div class="empty"><div class="empty-emoji">🛣️</div><div class="empty-text">Aucun trajet ce jour</div></div>'; return; }
-
-  let html = `<div style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--text)">${dateLabel}</div>`;
-  
-  const parseHeure = h => { if (!h) return 9999; const m = (h+'').replace('h',':').match(/(\d+):?(\d*)/); return m ? parseInt(m[1])*60+(parseInt(m[2])||0) : 9999; };
-  const lieuOrder = l => { if (!l) return 99; const ll=l.toLowerCase(); if (ll.includes('ndf')||ll.includes('notre dame')) return 0; if (ll.includes('madeleine')) return 1; if (ll.includes('lomb')||ll.includes('pie')) return 2; if (ll.includes('courm')) return 3; return 4; };
-  const aller = rides.filter(r => r.direction === 'ALLER').sort((a,b) => { const ta=parseHeure(a.time_group),tb=parseHeure(b.time_group); if (ta!==tb) return ta-tb; const la=lieuOrder(a.lieu),lb=lieuOrder(b.lieu); if (la!==lb) return la-lb; return parseHeure(a.heure)-parseHeure(b.heure); });
-  const retour = rides.filter(r => r.direction === 'RETOUR');
-  
-  if (aller.length) {
-    html += '<div class="divider">Aller</div>';
-    aller.forEach(r => { html += rideCardHtml(r, true); });
-  }
-  if (retour.length) {
-    html += '<div class="divider">Retour</div>';
-    retour.forEach(r => { html += rideCardHtml(r, true); });
-  }
-  container.innerHTML = html;
-}
 
 function getCapacityInfo(r) {
   const places = r.places || 4;
@@ -826,13 +828,16 @@ function rideCardHtml(r, showDriver = false) {
 // Populate driver select
 function initDriverSelect() {
   const sel = document.getElementById('driver-select');
-  const drivers = [...new Set(DATA.rides.map(r => r.chauffeur))].sort();
+  const cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  const drivers = [...new Set(DATA.rides.map(r => r.chauffeur))].sort((a,b)=>a.localeCompare(b,'fr'));
   drivers.forEach(d => {
     const opt = document.createElement('option');
     opt.value = d;
     opt.textContent = d;
     sel.appendChild(opt);
   });
+  if (cur && drivers.includes(cur)) sel.value = cur;
 }
 
 function loadDriverRides(driver) {
@@ -841,9 +846,8 @@ function loadDriverRides(driver) {
   
   const parseHeure = h => { if (!h) return 9999; const m = h.replace(/[h:]/,':').match(/(\d+):?(\d*)/); return m ? parseInt(m[1])*60+(parseInt(m[2])||0) : 9999; };
   const visibleSheets = new Set(DAYS.map(d => d.sheet));
-  const allRides = DATA.rides.filter(r => r.chauffeur === driver && visibleSheets.has(r.sheet));
-  const rides = allRides.filter(r => r.enfants.length > 0);
-  if (!allRides.length) {
+  const rides = DATA.rides.filter(r => r.chauffeur === driver && visibleSheets.has(r.sheet));
+  if (!rides.length) {
     container.innerHTML = '<div class="empty"><div class="empty-emoji">🚗</div><div class="empty-text">Aucun trajet trouvé</div></div>';
     return;
   }
@@ -889,6 +893,8 @@ function loadDriverRides(driver) {
 // ---- CHILD VIEW ----
 function initChildSelect() {
   const sel = document.getElementById('child-select');
+  const cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
   const sorted = [...DATA.children].sort((a, b) => a.prenom.localeCompare(b.prenom, 'fr'));
   sorted.forEach(c => {
     const opt = document.createElement('option');
@@ -897,6 +903,7 @@ function initChildSelect() {
     opt.textContent = c.prenom + initial;
     sel.appendChild(opt);
   });
+  if (cur) sel.value = cur;
 }
 
 function loadChildInfo(prenom) {
@@ -1030,10 +1037,11 @@ function loadChildInfo(prenom) {
         const reasonLabel = savedReason === 'bus' ? 'Prend le bus' : savedReason === 'none' ? 'Pas de trajet à prévoir' : savedReason === 'sick' ? 'Malade' : savedReason === 'vssp' ? "J'ai ma voiture sans permis, trop bien !" : 'Aucun trajet prévu';
         html += `
         <div class="ride-card" style="border-left:3px solid ${reasonColor};background:rgba(255,255,255,0.02);">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="badge ${badgeClass}">${dirLabel}</span>
               ${savedReason ? '<span style="font-size:14px;">' + reasonIcon + '</span>' : ''}
+              <button onclick="goToPlanningDay('${jsStr(d.sheet)}')" style="background:rgba(108,99,255,0.15);border:none;color:var(--accent);padding:4px 10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🔎 Trouver un trajet</button>
             </div>
             <select onchange="saveChildAbsence('${prenom}','${d.sheet}','${dir}',this.value,this)"
               style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;">
@@ -1059,23 +1067,45 @@ function saveChildAbsence(prenom, sheet, direction, val, sel) {
 }
 
 // ---- PLANNING VIEW ----
-let planningDay = DAYS[0].sheet;
+let planningDay = null;
+
 function initPlanning() {
   const container = document.getElementById('day-tabs-planning');
-  const todayIdx = getTodayIndex();
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!DAYS.length) {
+    document.getElementById('planning-content').innerHTML =
+      '<div class="empty"><div class="empty-emoji">🗓️</div><div class="empty-text">Aucun jour disponible</div></div>';
+    return;
+  }
+
+  // Le jour affiché par défaut est TOUJOURS aujourd'hui (ou le prochain jour d'école)
+  let idx = DAYS.findIndex(d => d.sheet === planningDay);
+  if (idx < 0) idx = getTodayIndex();
+  if (idx < 0) idx = 0;
+
   DAYS.forEach((d, i) => {
     const btn = document.createElement('button');
-    btn.className = 'day-tab' + (i === todayIdx ? ' active' : '');
-    btn.textContent = d.label;
+    btn.className = 'day-tab' + (i === idx ? ' active' : '');
+    btn.textContent = d.label + (isToday(d) ? ' •' : '');
     btn.onclick = () => {
+      planningDay = d.sheet;
       container.querySelectorAll('.day-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderPlanning(d.sheet, d.date);
     };
     container.appendChild(btn);
   });
-  renderPlanning(DAYS[todayIdx].sheet, DAYS[todayIdx].date);
-  setTimeout(() => container.querySelectorAll('.day-tab')[todayIdx]?.scrollIntoView({inline:'center', behavior:'smooth'}), 50);
+
+  planningDay = DAYS[idx].sheet;
+  renderPlanning(DAYS[idx].sheet, DAYS[idx].date);
+  setTimeout(() => container.querySelectorAll('.day-tab')[idx]?.scrollIntoView({inline:'center', behavior:'smooth'}), 50);
+}
+
+function isToday(d) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return d.dateObj && d.dateObj.getTime() === t.getTime();
 }
 
 function planningRideCardHtml(r) {
@@ -1083,24 +1113,35 @@ function planningRideCardHtml(r) {
   const color = stopColor(r.lieu);
   const heure = r.heure || r.time_group || '';
   const kids = r.enfants.map(k =>
-    `<span onclick="goToChild('${k.replace(/'/g,"\\'")}'); event.stopPropagation();"
-      style="display:inline-flex;align-items:center;gap:3px;background:rgba(108,99,255,0.13);border:1px solid rgba(108,99,255,0.25);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap;">👦 ${k}</span>`
+    `<span onclick="goToChild('${jsStr(k)}'); event.stopPropagation();"
+      style="display:inline-flex;align-items:center;gap:3px;background:rgba(108,99,255,0.13);border:1px solid rgba(108,99,255,0.25);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap;">👦 ${escHtml(k)}</span>`
   ).join('');
+
+  const joinBtn = cap.free > 0
+    ? `<button onclick="openJoinRide('${jsStr(r.id)}')" style="margin-top:8px;width:100%;padding:9px;background:rgba(67,233,123,0.14);border:1px solid rgba(67,233,123,0.35);border-radius:10px;color:var(--accent3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">👶 Mettre mon enfant (${cap.free} place${cap.free>1?'s':''})</button>`
+    : `<div style="margin-top:8px;text-align:center;font-size:12px;color:var(--text-muted);">Voiture complète</div>`;
 
   return `<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ${cap.color};border-radius:10px;padding:8px 10px;margin-bottom:7px;">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
-      <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;">${heure}</span>
+      <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;">${escHtml(heure)}</span>
       <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:${color};font-weight:600;">
-        <span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block;box-shadow:0 0 5px ${color};flex-shrink:0;"></span>${r.lieu || '—'}
+        <span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block;box-shadow:0 0 5px ${color};flex-shrink:0;"></span>${escHtml(r.lieu || '—')}
       </span>
       <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">${cap.emoji} ${cap.label}</span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:${r.enfants.length ? 6 : 0}px;">
-      <div class="driver-avatar" style="width:20px;height:20px;font-size:9px;flex-shrink:0;">${getInitials(r.chauffeur)}</div>
-      <span style="font-size:12px;font-weight:600;color:var(--text);">${r.chauffeur}</span>
+      <div class="driver-avatar" style="width:20px;height:20px;font-size:9px;flex-shrink:0;">${escHtml(getInitials(r.chauffeur))}</div>
+      <span style="font-size:12px;font-weight:600;color:var(--text);">${escHtml(r.chauffeur)}</span>
     </div>
-    ${r.enfants.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;">${kids}</div>` : ''}
+    ${r.enfants.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;">${kids}</div>` : '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">Voiture vide — places à prendre !</div>'}
+    ${joinBtn}
   </div>`;
+}
+
+// Ouvre le planning sur un jour précis (pour y inscrire son enfant)
+function goToPlanningDay(sheet) {
+  planningDay = sheet;
+  switchTab('planning');
 }
 
 function goToChild(prenom) {
@@ -1118,42 +1159,389 @@ function goToChild(prenom) {
 function renderPlanning(sheet, dateLabel) {
   const rides = DATA.rides.filter(r => r.sheet === sheet);
   const container = document.getElementById('planning-content');
-  
+  if (!container) return;
+
+  let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <div style="font-size:15px;font-weight:700;flex:1;">${escHtml(dateLabel)}</div>
+    </div>
+    <button onclick="openProposeRide('${jsStr(sheet)}')" style="width:100%;padding:13px;margin-bottom:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">🚗 Je propose un trajet</button>`;
+
   if (!rides.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-emoji">🗓️</div><div class="empty-text">Aucun trajet planifié</div></div>';
+    html += '<div class="empty"><div class="empty-emoji">🗓️</div><div class="empty-text">Aucun trajet proposé ce jour</div></div>';
+    container.innerHTML = html;
     return;
   }
 
-  let html = `<div style="font-size:15px;font-weight:700;margin-bottom:12px;">${dateLabel}</div>`;
-
   const ph = h => { if (!h) return 9999; const m = (h+'').replace('h',':').match(/(\d+):?(\d*)/); return m ? parseInt(m[1])*60+(parseInt(m[2])||0) : 9999; };
-  const lieuOrd = l => { if (!l) return 99; const ll=l.toLowerCase(); if (ll.includes('ndf')||ll.includes('notre dame')) return 0; if (ll.includes('madeleine')) return 1; if (ll.includes('lomb')||ll.includes('pie')) return 2; if (ll.includes('courm')) return 3; return 4; };
-  const aller = rides.filter(r => r.direction === 'ALLER').sort((a,b) => { const ta=ph(a.time_group),tb=ph(b.time_group); if (ta!==tb) return ta-tb; const la=lieuOrd(a.lieu),lb=lieuOrd(b.lieu); if (la!==lb) return la-lb; return ph(a.heure)-ph(b.heure); });
+  const lieuOrd = l => { if (!l) return 99; const ll=l.toLowerCase(); if (ll.includes('ndf')||ll.includes('notre dame')) return 0; if (ll.includes('madeleine')) return 1; if (ll.includes('lomb')||ll.includes('pie')) return 2; if (ll.includes('courm')) return 3; return 50; };
+  const byTimeSorted = arr => {
+    const byTime = {};
+    arr.forEach(r => { const k = r.time_group || r.heure || '—'; (byTime[k] = byTime[k] || []).push(r); });
+    return Object.keys(byTime).sort((a,b) => ph(a)-ph(b)).map(t => [t, byTime[t].slice().sort((a,b) => {
+      const la=lieuOrd(a.lieu), lb=lieuOrd(b.lieu); if (la!==lb) return la-lb; return ph(a.heure)-ph(b.heure);
+    })]);
+  };
+
+  const aller  = rides.filter(r => r.direction === 'ALLER');
   const retour = rides.filter(r => r.direction === 'RETOUR');
-  
+
   if (aller.length) {
     html += '<div class="divider">Aller</div>';
-    const byTime = {};
-    aller.forEach(r => { if (!byTime[r.time_group]) byTime[r.time_group] = []; byTime[r.time_group].push(r); });
-    const sortedKeys = Object.keys(byTime).sort((a,b) => ph(a)-ph(b));
-    sortedKeys.forEach(t => {
-      const rs = byTime[t].slice().sort((a,b) => { const la=lieuOrd(a.lieu),lb=lieuOrd(b.lieu); if (la!==lb) return la-lb; return ph(a.heure)-ph(b.heure); });
-      html += `<div class="section-title">Créneau ${t}</div>`;
-      rs.forEach(r => { if (r.enfants.length === 0) return; html += planningRideCardHtml(r); });
+    byTimeSorted(aller).forEach(([t, rs]) => {
+      html += `<div class="section-title">Créneau ${escHtml(t)}</div>`;
+      rs.forEach(r => { html += planningRideCardHtml(r); });
     });
   }
-
   if (retour.length) {
     html += '<div class="divider">Retour</div>';
-    const byTime = {};
-    retour.forEach(r => { if (!byTime[r.time_group]) byTime[r.time_group] = []; byTime[r.time_group].push(r); });
-    Object.entries(byTime).forEach(([t, rs]) => {
-      html += `<div class="section-title">RDV ${t}</div>`;
-      rs.forEach(r => { if (r.enfants.length === 0) return; html += planningRideCardHtml(r); });
+    byTimeSorted(retour).forEach(([t, rs]) => {
+      html += `<div class="section-title">RDV ${escHtml(t)}</div>`;
+      rs.forEach(r => { html += planningRideCardHtml(r); });
     });
   }
 
   container.innerHTML = html;
+}
+
+// ============================================================
+// MODULE PARENTS
+// 1. « Je propose un trajet »  → un parent crée une voiture
+// 2. « Je mets mon enfant »    → un autre parent inscrit son enfant
+// ============================================================
+
+const TIME_OPTIONS = ['7h05','7h10','7h15','7h20','7h25','7h30','7h40','7h45','7h50','8h00','8h10','8h15','8h20','8h30','8h55','9h05','9h25','9h50','12h00','12h55','13h50','14h45','15h40','16h30','16h50','17h20','17h45','18h45'];
+const LIEUX_ALLER  = ['NDF','Madeleine','Pie Lombard','Courmettes'];
+const LIEUX_RETOUR = ['RP du Sud','P. Mairie','Bureau CPE','S. des Profs','Gare SNCF','parvis primaire','lycée'];
+
+// Échappement pour insertion dans une chaîne JS d'un attribut onclick
+function jsStr(s) { return String(s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+// ---- Identité du parent (mémorisée sur l'appareil) ----
+function getMe()  { try { return localStorage.getItem('covoit_me') || ''; } catch(e) { return ''; } }
+function setMe(n) { try { localStorage.setItem('covoit_me', n || ''); } catch(e) {} updateMeBadge(); }
+
+function myChildren() {
+  const me = getMe();
+  if (!me) return [];
+  const dc = getDC();
+  if (dc[me]) return dc[me];
+  // Repli : recherche insensible à la casse
+  const key = Object.keys(dc).find(k => k.trim().toLowerCase() === me.trim().toLowerCase());
+  return key ? dc[key] : [];
+}
+
+// Enregistre un nouveau conducteur dans la liste partagée
+function registerDriver(nom) {
+  if (!nom) return;
+  const drivers = getDriversData();
+  if (drivers.some(d => d.nom.trim().toLowerCase() === nom.trim().toLowerCase())) return;
+  drivers.push({ nom, tel: '', email: '', places: '', note: '', famille: '' });
+  saveDriversData(drivers);
+  try {
+    const bl = JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]').filter(n => n !== nom);
+    localStorage.setItem('covoit_drivers_deleted', JSON.stringify(bl));
+  } catch(e) {}
+}
+
+function allDriverNames() {
+  const names = new Set(getDriversData().map(d => d.nom));
+  DATA.rides.forEach(r => { if (r.chauffeur) names.add(r.chauffeur); });
+  return [...names].sort((a, b) => a.localeCompare(b, 'fr'));
+}
+
+function updateMeBadge() {
+  const el = document.getElementById('me-badge');
+  if (!el) return;
+  const me = getMe();
+  el.textContent = me ? '👤 ' + me.split(' ')[0] : '👤 Qui suis-je ?';
+}
+
+function openIdentity() {
+  const me = getMe();
+  const opts = allDriverNames()
+    .map(n => `<option value="${escHtml(n)}" ${n === me ? 'selected' : ''}>${escHtml(n)}</option>`).join('');
+  openModal(`
+    <div style="font-size:18px;font-weight:800;margin-bottom:6px;">👤 Qui êtes-vous ?</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Mémorisé sur cet appareil : vos trajets et vos enfants seront pré-remplis.</div>
+    <select id="me-select" class="search-input" style="padding-left:14px;">
+      <option value="">— Choisir mon nom —</option>${opts}
+    </select>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button onclick="closeAppModal()" style="flex:1;padding:14px;background:var(--surface2);border:none;border-radius:12px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Annuler</button>
+      <button onclick="saveIdentity()" style="flex:2;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">💾 C'est moi</button>
+    </div>`);
+}
+
+function saveIdentity() {
+  setMe(document.getElementById('me-select').value);
+  closeAppModal();
+  showToast(getMe() ? '👋 Bonjour ' + getMe().split(' ')[0] + ' !' : 'Identité effacée');
+}
+
+// ---- Modale générique ----
+function openModal(html) {
+  const c = document.getElementById('app-modal-content');
+  if (!c) return;
+  c.innerHTML = html;
+  document.getElementById('app-modal').style.display = 'block';
+}
+function closeAppModal() {
+  const m = document.getElementById('app-modal');
+  if (m) m.style.display = 'none';
+}
+
+// ============================================================
+// 1) PROPOSER UN TRAJET
+// ============================================================
+function openProposeRide(sheet) {
+  if (!DAYS.length) { showToast('Aucun jour disponible'); return; }
+  const defDay = DAYS.find(d => d.sheet === sheet) || getDefaultDay() || DAYS[0];
+  const me = getMe();
+
+  const dayOptions = DAYS.map(d =>
+    `<option value="${escHtml(d.sheet)}" ${d.sheet === defDay.sheet ? 'selected' : ''}>${escHtml(d.date)}${isToday(d) ? " (aujourd'hui)" : ''}</option>`).join('');
+  const driverOptions = allDriverNames().map(n =>
+    `<option value="${escHtml(n)}" ${n === me ? 'selected' : ''}>${escHtml(n)}</option>`).join('');
+
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-size:18px;font-weight:800;">🚗 Je propose un trajet</div>
+      <button onclick="closeAppModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Les autres parents pourront ensuite y inscrire leurs enfants.</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <div class="info-label" style="margin-bottom:6px;">Jour</div>
+        <select id="p-sheet" class="search-input" style="padding-left:14px;">${dayOptions}</select>
+      </div>
+      <div>
+        <div class="info-label" style="margin-bottom:6px;">Direction</div>
+        <div class="view-toggle" style="margin:0;">
+          <button class="toggle-btn active" id="p-dir-aller"  onclick="setProposeDir('ALLER')">➡ Aller</button>
+          <button class="toggle-btn"        id="p-dir-retour" onclick="setProposeDir('RETOUR')">⬅ Retour</button>
+        </div>
+        <input type="hidden" id="p-direction" value="ALLER">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div class="info-label" style="margin-bottom:6px;">Heure de départ</div>
+          <select id="p-heure" class="search-input" style="padding-left:14px;">
+            ${TIME_OPTIONS.map(t => `<option value="${t}" ${t === '7h10' ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <div class="info-label" style="margin-bottom:6px;">Créneau d'arrivée</div>
+          <select id="p-timegroup" class="search-input" style="padding-left:14px;">
+            ${TIME_OPTIONS.map(t => `<option value="${t}" ${t === '8h00' ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div class="info-label" style="margin-bottom:6px;">Lieu de départ / RDV</div>
+          <select id="p-lieu" class="search-input" style="padding-left:14px;">
+            ${LIEUX_ALLER.map(l => `<option value="${l}">${l}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <div class="info-label" style="margin-bottom:6px;">Places 🚗</div>
+          <select id="p-places" class="search-input" style="padding-left:14px;">
+            ${[1,2,3,4,5,6,7].map(n => `<option value="${n}" ${n === 4 ? 'selected' : ''}>${n} place${n>1?'s':''}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="info-label" style="margin-bottom:6px;">Conducteur</div>
+        <select id="p-chauffeur" class="search-input" style="padding-left:14px;" onchange="document.getElementById('p-new-chauffeur').style.display = this.value === '__new__' ? '' : 'none';">
+          <option value="">— Choisir —</option>
+          ${driverOptions}
+          <option value="__new__">+ Nouveau conducteur…</option>
+        </select>
+        <input type="text" id="p-new-chauffeur" class="search-input" style="display:none;margin-top:8px;padding-left:14px;" placeholder="Prénom NOM">
+      </div>
+      <div>
+        <div class="info-label" style="margin-bottom:6px;">J'emmène déjà (facultatif)</div>
+        <div id="p-children" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button onclick="closeAppModal()" style="flex:1;padding:14px;background:var(--surface2);border:none;border-radius:12px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Annuler</button>
+      <button onclick="saveProposeRide()" style="flex:2;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">✅ Proposer</button>
+    </div>`);
+
+  renderProposeChildren();
+  document.getElementById('p-sheet').addEventListener('change', renderProposeChildren);
+}
+
+function setProposeDir(dir) {
+  document.getElementById('p-direction').value = dir;
+  document.getElementById('p-dir-aller').classList.toggle('active', dir === 'ALLER');
+  document.getElementById('p-dir-retour').classList.toggle('active', dir === 'RETOUR');
+  const sel = document.getElementById('p-lieu');
+  const lieux = dir === 'ALLER' ? LIEUX_ALLER : LIEUX_RETOUR;
+  sel.innerHTML = lieux.map(l => `<option value="${l}">${l}</option>`).join('');
+  const heure = document.getElementById('p-heure');
+  const grp   = document.getElementById('p-timegroup');
+  heure.value = dir === 'ALLER' ? '7h10'  : '16h30';
+  grp.value   = dir === 'ALLER' ? '8h00'  : '16h50';
+  renderProposeChildren();
+}
+
+// Mes enfants, cochables ; ceux déjà placés ce jour-là sont verrouillés
+function renderProposeChildren() {
+  const grid = document.getElementById('p-children');
+  if (!grid) return;
+  const sheet = document.getElementById('p-sheet').value;
+  const dir   = document.getElementById('p-direction').value;
+  const taken = childrenTakenThatDay(sheet, dir);
+  const mine  = myChildren();
+  const list  = mine.length ? mine : [];
+
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--text-muted);">
+      ${getMe() ? 'Aucun enfant enregistré à votre nom.' : 'Indiquez votre nom (👤 en haut) pour retrouver vos enfants.'}
+      Vous pourrez les ajouter au trajet juste après.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(c => {
+    if (taken.has(c)) {
+      return `<label style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);opacity:0.45;" title="Déjà dans un autre trajet ce jour">
+        <span>🔒</span><span style="text-decoration:line-through;font-size:13px;color:var(--text-muted);">${escHtml(childLabel(c))}</span></label>`;
+    }
+    return `<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--surface2);border-radius:8px;cursor:pointer;border:1px solid var(--border);">
+      <input type="checkbox" name="p_child" value="${escHtml(c)}" checked><span style="font-size:13px;">${escHtml(childLabel(c))}</span></label>`;
+  }).join('');
+}
+
+function childrenTakenThatDay(sheet, direction, exceptRideId) {
+  const taken = new Set();
+  DATA.rides
+    .filter(r => r.sheet === sheet && r.direction === direction && r.id !== exceptRideId)
+    .forEach(r => r.enfants.forEach(e => taken.add(e)));
+  return taken;
+}
+
+function saveProposeRide() {
+  const sheet      = document.getElementById('p-sheet').value;
+  const direction  = document.getElementById('p-direction').value;
+  const heure      = document.getElementById('p-heure').value;
+  const time_group = document.getElementById('p-timegroup').value;
+  const lieu       = document.getElementById('p-lieu').value;
+  const places     = parseInt(document.getElementById('p-places').value) || 4;
+  let chauffeur    = document.getElementById('p-chauffeur').value;
+  if (chauffeur === '__new__') chauffeur = document.getElementById('p-new-chauffeur').value.trim();
+  if (!chauffeur) { alert('Indiquez qui conduit.'); return; }
+
+  const enfants = [...document.querySelectorAll('input[name="p_child"]:checked')].map(cb => cb.value);
+  if (enfants.length > places) { alert('Trop d\'enfants pour ' + places + ' place(s).'); return; }
+
+  const day = ALL_DAYS.find(d => d.sheet === sheet);
+  const parts = day ? day.date.split(' ') : ['','',''];
+  DATA.rides.push({
+    id: genId(), sheet, day: parts[1] || '', month: parts[2] || '',
+    direction, heure, time_group, lieu, chauffeur, enfants, places
+  });
+  registerDriver(chauffeur);
+  if (!getMe()) setMe(chauffeur);
+
+  saveData();
+  closeAppModal();
+  showToast('✅ Trajet proposé !');
+  planningDay = sheet;
+  refreshAll();
+  saveToGitHub(false);
+}
+
+// ============================================================
+// 2) METTRE SON ENFANT DANS UN TRAJET
+// ============================================================
+function openJoinRide(rideId) {
+  const r = DATA.rides.find(x => x.id === rideId);
+  if (!r) { showToast('Trajet introuvable'); return; }
+  const day = ALL_DAYS.find(d => d.sheet === r.sheet);
+  const cap = getCapacityInfo(r);
+  const taken = childrenTakenThatDay(r.sheet, r.direction, r.id);
+  const mine = myChildren().filter(c => !taken.has(c) && !r.enfants.includes(c));
+  const others = [...DATA.children]
+    .map(c => c.prenom)
+    .filter(c => !taken.has(c) && !r.enfants.includes(c) && !mine.includes(c))
+    .sort((a, b) => a.localeCompare(b, 'fr'));
+
+  const passengers = r.enfants.length
+    ? r.enfants.map(c => `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(108,99,255,0.13);border:1px solid rgba(108,99,255,0.25);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--accent);">
+        👦 ${escHtml(childLabel(c))}
+        <span onclick="leaveRide('${jsStr(r.id)}','${jsStr(c)}')" style="cursor:pointer;color:var(--accent2);font-weight:800;" title="Retirer">×</span></span>`).join('')
+    : '<span style="font-size:12px;color:var(--text-muted);">Personne pour l\'instant</span>';
+
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-size:18px;font-weight:800;">👶 Mettre mon enfant</div>
+      <button onclick="closeAppModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+    </div>
+
+    <div class="ride-card" style="margin-bottom:16px;border-left:3px solid ${cap.color};">
+      <div style="font-size:13px;color:var(--text-muted);">${escHtml(day ? day.date : r.sheet)}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin:4px 0 6px;">
+        <span class="badge ${r.direction === 'ALLER' ? 'badge-aller' : 'badge-retour'}">${r.direction === 'ALLER' ? '➡ Aller' : '⬅ Retour'}</span>
+        <span style="font-size:16px;font-weight:800;">${escHtml(r.heure || r.time_group)}</span>
+        <span style="font-size:13px;color:var(--text-muted);">${escHtml(r.lieu || '—')}</span>
+      </div>
+      <div class="driver-chip"><div class="driver-avatar">${escHtml(getInitials(r.chauffeur))}</div>${escHtml(r.chauffeur)}</div>
+      <div style="margin-top:8px;font-size:12px;font-weight:700;color:${cap.color};">${cap.emoji} ${cap.label}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">${passengers}</div>
+    </div>
+
+    ${cap.free <= 0 ? '<div style="padding:12px;background:rgba(255,101,132,0.12);border:1px solid rgba(255,101,132,0.4);border-radius:10px;color:#ff6584;font-size:13px;font-weight:600;text-align:center;">Voiture complète — retirez un passager pour libérer une place.</div>' : `
+      ${mine.length ? `<div class="info-label" style="margin-bottom:6px;">Mes enfants</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+          ${mine.map(c => `<button onclick="joinRide('${jsStr(r.id)}','${jsStr(c)}')" style="padding:9px 14px;background:rgba(67,233,123,0.14);border:1px solid rgba(67,233,123,0.35);border-radius:10px;color:var(--accent3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">+ ${escHtml(childLabel(c))}</button>`).join('')}
+        </div>` : ''}
+      <div class="info-label" style="margin-bottom:6px;">${mine.length ? 'Un autre enfant' : 'Choisir un enfant'}</div>
+      <select id="join-child" class="search-input" style="padding-left:14px;">
+        <option value="">— Sélectionner —</option>
+        ${others.map(c => `<option value="${escHtml(c)}">${escHtml(childLabel(c))}</option>`).join('')}
+      </select>
+      <button onclick="joinRide('${jsStr(r.id)}', document.getElementById('join-child').value)" style="width:100%;margin-top:12px;padding:14px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">✅ Ajouter au trajet</button>`}
+
+    ${taken.size ? `<div style="margin-top:14px;font-size:11px;color:var(--text-muted);">🔒 Les enfants déjà placés dans un autre trajet ce jour-là ne sont pas proposés.</div>` : ''}
+  `);
+}
+
+function joinRide(rideId, prenom) {
+  if (!prenom) { alert('Choisissez un enfant.'); return; }
+  const r = DATA.rides.find(x => x.id === rideId);
+  if (!r) { showToast('Trajet introuvable'); return; }
+  if (r.enfants.includes(prenom)) { showToast('Déjà inscrit'); return; }
+  const places = r.places || 4;
+  if (r.enfants.length >= places) { alert('Voiture complète (' + places + ' place' + (places>1?'s':'') + ').'); return; }
+  if (childrenTakenThatDay(r.sheet, r.direction, r.id).has(prenom)) {
+    if (!confirm(prenom + ' est déjà dans un autre trajet ce jour-là. Le déplacer ici ?')) return;
+    DATA.rides.forEach(o => {
+      if (o.id !== r.id && o.sheet === r.sheet && o.direction === r.direction) {
+        o.enfants = o.enfants.filter(e => e !== prenom);
+      }
+    });
+  }
+  r.enfants.push(prenom);
+  saveData();
+  showToast('✅ ' + prenom + ' est inscrit !');
+  refreshAll();
+  openJoinRide(rideId);
+  saveToGitHub(false);
+}
+
+function leaveRide(rideId, prenom) {
+  const r = DATA.rides.find(x => x.id === rideId);
+  if (!r) return;
+  if (!confirm('Retirer ' + prenom + ' de ce trajet ?')) return;
+  r.enfants = r.enfants.filter(e => e !== prenom);
+  saveData();
+  showToast('Retiré : ' + prenom);
+  refreshAll();
+  openJoinRide(rideId);
+  saveToGitHub(false);
 }
 
 // ===================== ADMIN MODULE =====================
@@ -1239,7 +1627,7 @@ async function saveToGitHub(showMsg) {
       drivers:         getDriversData(),
       driver_children: getDC(),
       drivers_deleted: JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]'),
-      extra_days:      JSON.parse(localStorage.getItem('covoit_extra_days') || '[]'),
+      extra_days:      extraDaysForSave(),
       equity_archive:  JSON.parse(localStorage.getItem('covoit_equity_archive') || '[]'),
       last_updated:    new Date().toISOString()
     };
@@ -1254,12 +1642,26 @@ async function saveToGitHub(showMsg) {
       })(),
       sha:     _ghSha
     };
-    const res = await fetch(PROXY_URL, {
+    let res = await fetch(PROXY_URL, {
       method:  'PUT',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(body)
     });
-    if (!res.ok) { const err = await res.json(); throw new Error(err.message || err.error || 'HTTP ' + res.status); }
+    // Conflit : un autre parent a enregistré entre temps → on relit, on refusionne, on réessaie
+    if (res.status === 409 || res.status === 422) {
+      const fresh = await fetch(PROXY_URL + '?t=' + Date.now());
+      if (fresh.ok) {
+        const meta = await fresh.json();
+        _ghSha = meta.sha;
+        body.sha = meta.sha;
+        res = await fetch(PROXY_URL, {
+          method:  'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(body)
+        });
+      }
+    }
+    if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || err.error || 'HTTP ' + res.status); }
     const result = await res.json();
     _ghSha = result.content.sha;
     if (showMsg !== false) showToast('✅ Sauvegardé !');
@@ -1279,9 +1681,7 @@ function applyGhData(content) {
   if (content.drivers_deleted) localStorage.setItem('covoit_drivers_deleted',  JSON.stringify(content.drivers_deleted));
   if (content.extra_days && content.extra_days.length) {
     localStorage.setItem('covoit_extra_days', JSON.stringify(content.extra_days));
-    content.extra_days.forEach(function(d) {
-      if (!DAYS.find(function(x) { return x.sheet === d.sheet; })) DAYS.push(d);
-    });
+    registerDays(content.extra_days);
   }
   if (content.equity_archive) {
     localStorage.setItem('covoit_equity_archive', JSON.stringify(content.equity_archive));
@@ -1315,10 +1715,12 @@ function addRefreshButton() {
     btn.innerHTML = '⏳';
     const ok = await loadFromGitHub();
     if (ok) {
-      filterPastDays();
-      initDriverSelect();
-      initChildSelect();
+      loadSavedData();
+      rebuildDays();
+      updateTodayLabel();
+      refreshAll();
       const activeScreen = document.querySelector('.screen.active');
+      if (activeScreen && activeScreen.id === 'screen-planning') initPlanning();
       if (activeScreen && activeScreen.id === 'screen-admin') renderAdminHome();
     }
     btn.innerHTML = '🔄';
@@ -1326,8 +1728,9 @@ function addRefreshButton() {
   document.body.appendChild(btn);
 }
 
-// Pré-chargement des données depuis backup localStorage (12/03/2026)
+// Secours hors ligne : données embarquées, réinjectées uniquement si le stockage local est vide
 (function() {
+  if (localStorage.getItem('covoit_rides')) return;
   localStorage.setItem('covoit_rides', JSON.stringify([{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marika MASSOUTIER","heure":"7h20","lieu":"P.-Lomb.","enfants":["Nina","Térence","Eyrian"],"id":"mmnqdk8cxvz3"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Rachel ROBINSON","heure":"7h05","lieu":"Madeleine","enfants":["Mila","Matilda","Lisa","Cesar","Oscar"],"id":"mmnqdk8c6pht"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Pierre COULON","heure":"7h10","lieu":"P.-Lomb.","enfants":["Méane","Vanille","Louis C","Célia"],"id":"mmnqdk8c6j0y"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Anne Sophie SAMYN","heure":"7h15","lieu":"Courmettes","enfants":["Isaac","Léonie"],"id":"mmnqdk8cqdrf"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Lisa VAN HELDEN","heure":"7h05","lieu":"NDF","enfants":["Gabriel","Valentin","Sidney","Olivia"],"id":"mmnqdk8cukad"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Michon SWEET","heure":"7h10","lieu":"NDF","enfants":["Virgile","Luca"],"id":"mmnqdk8crl8e"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Mahé GAUCHEROT","heure":"7h10","lieu":"NDF","enfants":["Camille","Noah","Lucie"],"id":"mmnqdk8cr07z"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Teiva"],"id":"mmnqdk8c9cpv"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Leonie GRANAUD","heure":"7h10","lieu":"Madeleine","enfants":["Noah","Andy","Lou","Finnian"],"id":"mmnqdk8ch9k4"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"ALLER","time_group":"10h10","chauffeur":"Alexandra PEACOCK","heure":"9h05","lieu":"NDF","enfants":["Sophie"],"id":"mmnqdk8cvpjb"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Anne Sophie SAMYN","heure":"","lieu":"lycée","enfants":["Isaac","Clara","Léonie","Vanille"],"id":"mmnqdk8c448e"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Virginie BOULLE","heure":"","lieu":"lycée","enfants":["Teiva","Térence"],"id":"mmnqdk8crbq3"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Lisa VAN HELDEN","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sidney","Olivia"],"id":"mmnqdk8ccl4x"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Alexandra PEACOCK","heure":"","lieu":"P. Mairie","enfants":[],"id":"mmnqdk8cbj8q"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Marika MASSOUTIER","heure":"","lieu":"lycée","enfants":["Nina","Sam","Eyrian"],"id":"mmnqdk8czs73"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Delphine LAMARRE","heure":"","lieu":"P. Mairie","enfants":["Méane","Louis C"],"id":"mmnqdk8c2w91"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Olivier GRANAUD","heure":"","lieu":"P. Mairie","enfants":["Mila","Lisa","Andy","Lou"],"id":"mmnqdk8c92pk"},{"sheet":"Lundi A","day":"9","month":"Mars","direction":"RETOUR","time_group":"17h20","chauffeur":"Mahé GAUCHEROT","heure":"","lieu":"RDV","enfants":["Camille","Noah","Finnian","Lucie"],"id":"mmnqdk8cfdhn"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marika MASSOUTIER","heure":"7h20","lieu":"Courmettes","enfants":["Sam","Térence","Eyrian"],"id":"mmnqdk8c11on"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Pierre COULON","heure":"7h10","lieu":"P.-Lomb.","enfants":["Côme","Finnian"],"id":"mmnqdk8cgaod"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Rachel ROBINSON","heure":"7h05","lieu":"Madeleine","enfants":["Mila","Matilda","Isaac"],"id":"mmnqdk8c2srw"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Olivier TRONCHON","heure":"7h15","lieu":"Madeleine","enfants":["Lucie","Nina","Virgile"],"id":"mmnqdk8cl5tc"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marido DEROCHE","heure":"7h10","lieu":"NDF","enfants":["Jeanne","Capucine","Emma"],"id":"mmnqdk8cvrdz"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Teiva"],"id":"mmnqdk8c6o06"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h30","lieu":"NDF","enfants":["Gabriel","Valentin"],"id":"mmnqdk8cl16r"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"8h55","chauffeur":"Olivier GRANAUD","heure":"8h10","lieu":"Madeleine","enfants":["Lou"],"id":"mmnqdk8csjhf"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"ALLER","time_group":"10h10","chauffeur":"Fabienne CHARLES MAC-MAHON","heure":"9h25","lieu":"Courmettes","enfants":["Clara"],"id":"mmnqdk8cot05"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Delphine LAMARRE","heure":"","lieu":"P. Mairie","enfants":["Méane","Côme","Finnian"],"id":"mmnqdk8ca82i"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Nicol BRUMWELL","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sidney"],"id":"mmnqdk8czipr"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Marido DEROCHE","heure":"","lieu":"Gare SNCF","enfants":["Matilda","Andy","Capucine"],"id":"mmnqdk8ci5mt"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Frances MOULAERT","heure":"","lieu":"P. Mairie","enfants":["Matilda","Vanille","Cesar","Célia"],"id":"mmnqdk8cpubl"},{"sheet":"Mardi A","day":"10","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Fabienne CHARLES MAC-MAHON","heure":"","lieu":"lycée","enfants":["Clara","Sam","Eyrian"],"id":"mmnqdk8c1yd0"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Pierre COULON","heure":"7h10","lieu":"P.-Lomb.","enfants":["Matilda","Méane","Vanille","Côme","Louis C"],"id":"mmnqdk8cw6ul"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Antony NOWE","heure":"7h15","lieu":"Courmettes","enfants":["Cesar","Isaac","Léonie"],"id":"mmnqdk8c761a"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Nicolas MOULAERT","heure":"7h10","lieu":"P.-Lomb.","enfants":["Matilda","Célia"],"id":"mmnqdk8cj17q"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Olivier TRONCHON","heure":"7h10","lieu":"NDF","enfants":["Nina","Emma","Virgile"],"id":"mmnqdk8cg8qh"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marido DEROCHE","heure":"7h10","lieu":"NDF","enfants":["Capucine","Térence","Eyrian"],"id":"mmnqdk8cik58"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Teiva"],"id":"mmnqdk8cz4ix"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Ian WALLACE","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8cp86d"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"ALLER","time_group":"8h55","chauffeur":"Nathalie SUDRIAL","heure":"8h10","lieu":"Madeleine","enfants":["Mila","Lou","Côme"],"id":"mmnqdk8chnn2"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"RETOUR","time_group":"12h00","chauffeur":"Pierre COULON","heure":"","lieu":"P. Mairie","enfants":["Matilda","Méane","Vanille","Côme","Louis C","Célia"],"id":"mmnqdk8ceesu"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"RETOUR","time_group":"12h55","chauffeur":"Mahé GAUCHEROT","heure":"","lieu":"lycée","enfants":["Camille","Isaac","Emma","Lucie"],"id":"mmnqdk8cq1y6"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"RETOUR","time_group":"12h55","chauffeur":"Cecile MEGY","heure":"","lieu":"lycée","enfants":["Nina"],"id":"mmnqdk8c7y5f"},{"sheet":"Mercredi A","day":"11","month":"Mars","direction":"RETOUR","time_group":"12h55","chauffeur":"Fabienne CHARLES MAC-MAHON","heure":"","lieu":"lycée","enfants":["Clara","Léonie","Sam"],"id":"mmnqdk8cho8m"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Teiva","Lucie","Léonie"],"id":"mmnqdk8clzjl"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Nathalie SUDRIAL","heure":"7h10","lieu":"Madeleine","enfants":["Matilda","Vanille","Côme","Célia"],"id":"mmnqdk8cbmwl"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marido DEROCHE","heure":"7h10","lieu":"NDF","enfants":["Capucine","Eyrian"],"id":"mmnqdk8cwj0v"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"David BRILLANT","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8cwsc2"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Frances MOULAERT","heure":"7h10","lieu":"P.-Lomb.","enfants":["Matilda","Andy","Lou","Célia"],"id":"mmnqdk8cn0tt"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h30","lieu":"NDF","enfants":["Gabriel","Valentin","Sidney"],"id":"mmnqdk8co1xw"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"8h55","chauffeur":"Fabienne CHARLES MAC-MAHON","heure":"8h15","lieu":"Courmettes","enfants":["Isaac","Sam","Térence"],"id":"mmnqdk8cge9r"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"ALLER","time_group":"10h10","chauffeur":"Alexandra PEACOCK","heure":"9h05","lieu":"NDF","enfants":["Sophie"],"id":"mmnqdk8c8ug7"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Alexandra DALMASSO","heure":"","lieu":"P. Mairie","enfants":["Mila","Lisa","Cesar","Célia"],"id":"mmnqdk8cc9ua"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Frances MOULAERT","heure":"","lieu":"P. Mairie","enfants":["Matilda","Andy","Oscar"],"id":"mmnqdk8czkwq"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Alexandra PEACOCK","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sophie","Sidney","Olivia"],"id":"mmnqdk8cf6gl"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Fabienne CHARLES MAC-MAHON","heure":"","lieu":"lycée","enfants":["Sam","Térence","Eyrian"],"id":"mmnqdk8csmj3"},{"sheet":"Jeudi A","day":"12","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Marido DEROCHE","heure":"","lieu":"Gare SNCF","enfants":["Camille","Capucine","Finnian"],"id":"mmnqdk8cbdvc"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marika MASSOUTIER","heure":"7h20","lieu":"P.-Lomb.","enfants":["Sam","Térence","Eyrian"],"id":"mmnqdk8couwf"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Olivier TRONCHON","heure":"7h15","lieu":"Madeleine","enfants":["Capucine","Emma","Virgile"],"id":"mmnqdk8cmmju"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Anne Sophie SAMYN","heure":"7h15","lieu":"Courmettes","enfants":["Cesar","Célia"],"id":"mmnqdk8cw57r"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandra DALMASSO","heure":"7h10","lieu":"Madeleine","enfants":["Mila","Lisa","Andy","Lou"],"id":"mmnqdk8cdm7i"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Michon SWEET","heure":"7h10","lieu":"NDF","enfants":["Lucie","Emma","Joshua","Luca"],"id":"mmnqdk8c52h6"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Ian WALLACE","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8c9am6"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Julien MEGY","heure":"7h10","lieu":"P.-Lomb.","enfants":["Matilda","Vanille","Côme","Nina"],"id":"mmnqdk8c3kvr"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h30","lieu":"NDF","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8ccfkj"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Louise CARSON","heure":"","lieu":"P. Mairie","enfants":["Camille","Olivia","Noah","Finnian","Joshua","Luca"],"id":"mmnqdk8ckfsi"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Leonie GRANAUD","heure":"","lieu":"P. Mairie","enfants":["Andy","Lou"],"id":"mmnqdk8cr3z9"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Nicol BRUMWELL","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8c5io5"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Léa BERTAINA","heure":"","lieu":"P. Mairie","enfants":["Cesar","Côme"],"id":"mmnqdk8cr7e2"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Julien MEGY","heure":"","lieu":"Gare SNCF","enfants":["Matilda","Vanille","Côme","Finnian","Célia"],"id":"mmnqdk8cz2xt"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"17h45","chauffeur":"Alexandra DALMASSO","heure":"","lieu":"P. Mairie","enfants":["Mila","Lisa","Sam","Eyrian"],"id":"mmnqdk8cqgsr"},{"sheet":"Vendredi A","day":"13","month":"Mars","direction":"RETOUR","time_group":"18h45","chauffeur":"Mahé GAUCHEROT","heure":"","lieu":"lycée","enfants":["Lucie"],"id":"mmnqdk8cwlf4"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marika MASSOUTIER","heure":"7h25","lieu":"P.-Lomb.","enfants":["Nina","Louis B","Térence","Eyrian"],"id":"mmnqdk8cjax3"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandra DALMASSO","heure":"","lieu":"Départ","enfants":["Mila","Lisa","Lou","Célia"],"id":"mmnqdk8c0zv6"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Anne Sophie SAMYN","heure":"7h15","lieu":"Courmettes","enfants":["Matilda","Vanille","Cesar","Célia"],"id":"mmnqdk8c3s9p"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Isaac","Clara","Teiva"],"id":"mmnqdk8ca262"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Ian WALLACE","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8clega"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Mahé GAUCHEROT","heure":"7h10","lieu":"NDF","enfants":["Lucie","Joshua","Luca"],"id":"mmnqdk8ckxf4"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Pierre COULON","heure":"7h10","lieu":"P.-Lomb.","enfants":["Méane","Louis C","Côme"],"id":"mmnqdk8cgb5b"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h10","lieu":"NDF","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8cl9zj"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"ALLER","time_group":"8h55","chauffeur":"Michon SWEET","heure":"8h10","lieu":"NDF","enfants":["Andy","Capucine","Luca"],"id":"mmnqdk8crz19"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Alexandra PEACOCK","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8cvlao"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Jerome SUDRIAL","heure":"","lieu":"Gare SNCF","enfants":["Mila","Côme","Louis C","Célia"],"id":"mmnqdk8cvon0"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Louise CARSON","heure":"","lieu":"P. Mairie","enfants":["Olivia","Noah","Finnian","Joshua"],"id":"mmnqdk8cg4ta"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Delphine LAMARRE","heure":"","lieu":"P. Mairie","enfants":["Méane"],"id":"mmnqdk8c4quz"},{"sheet":"Lundi B","day":"16","month":"Mars","direction":"RETOUR","time_group":"17h20","chauffeur":"Mahé GAUCHEROT","heure":"","lieu":"lycée","enfants":["Camille","Léonie","Lucie"],"id":"mmnqdk8ccd2b"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marika MASSOUTIER","heure":"7h30","lieu":"Courmettes","enfants":["Louis B","Térence","Eyrian"],"id":"mmnqdk8cfk5q"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Anne Sophie SAMYN","heure":"7h15","lieu":"Courmettes","enfants":["Cesar","Côme","Célia"],"id":"mmnqdk8cyby5"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Nathalie SUDRIAL","heure":"7h10","lieu":"Madeleine","enfants":["Lisa","Méane","Louis C"],"id":"mmnqdk8c071a"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Vanille","Teiva","Nina"],"id":"mmnqdk8cg8kc"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Mahé GAUCHEROT","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8chdvu"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marido DEROCHE","heure":"7h10","lieu":"NDF","enfants":["Capucine","Lucie","Emma","Virgile"],"id":"mmnqdk8cv553"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h30","lieu":"NDF","enfants":["Gabriel","Valentin","Sophie"],"id":"mmnqdk8c75v2"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Louise CARSON","heure":"","lieu":"P. Mairie","enfants":["Camille","Olivia","Noah","Finnian","Joshua"],"id":"mmnqdk8chzub"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Delphine LAMARRE","heure":"","lieu":"P. Mairie","enfants":["Méane","Louis C"],"id":"mmnqdk8ceo00"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Nicol BRUMWELL","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8c1w22"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Léa BERTAINA","heure":"","lieu":"P. Mairie","enfants":["Mila","Cesar","Côme"],"id":"mmnqdk8c4okh"},{"sheet":"Mardi B","day":"17","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Mahé GAUCHEROT","heure":"","lieu":"lycée","enfants":["Nina","Lucie"],"id":"mmnqdk8c2cgx"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Sylvie BERTHOULOUX","heure":"7h25","lieu":"Courmettes","enfants":["Louis B","Térence","Eyrian"],"id":"mmnqdk8chr05"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandra DALMASSO","heure":"7h10","lieu":"Madeleine","enfants":["Mila","Lisa","Andy","Louis C"],"id":"mmnqdk8cqyb9"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Michon SWEET","heure":"7h10","lieu":"NDF","enfants":["Lucie","Emma","Virgile","Luca"],"id":"mmnqdk8c798p"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Isaac","Clara"],"id":"mmnqdk8c91rs"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Mahé GAUCHEROT","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8cum76"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Cecile MEGY","heure":"7h10","lieu":"P.-Lomb.","enfants":["Vanille","Côme","Léonie","Nina"],"id":"mmnqdk8cqa8n"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Anne Sophie SAMYN","heure":"7h15","lieu":"Courmettes","enfants":["Matilda","Cesar","Célia"],"id":"mmnqdk8cdboz"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"RETOUR","time_group":"12h00","chauffeur":"Cecile MEGY","heure":"","lieu":"RP du Sud","enfants":["Méane","Vanille","Louis C","Côme","Nina"],"id":"mmnqdk8c4f6a"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"RETOUR","time_group":"12h00","chauffeur":"Frances MOULAERT","heure":"","lieu":"P. Mairie","enfants":["Matilda","Cesar","Célia","Oscar","Léonie"],"id":"mmnqdk8csddf"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"RETOUR","time_group":"12h55","chauffeur":"Sylvie BERTHOULOUX","heure":"","lieu":"lycée","enfants":["Louis B"],"id":"mmnqdk8ccxpd"},{"sheet":"Mercredi B","day":"18","month":"Mars","direction":"RETOUR","time_group":"12h55","chauffeur":"Mahé GAUCHEROT","heure":"","lieu":"lycée","enfants":["Camille","Léonie","Emma","Joshua"],"id":"mmnqdk8c5f1p"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Rachel ROBINSON","heure":"7h05","lieu":"Madeleine","enfants":["Mila","Matilda","Lisa","Cesar","Andy","Célia"],"id":"mmnqdk8c8sqd"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Teiva"],"id":"mmnqdk8cnar4"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Ian WALLACE","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8c5zqa"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Pierre COULON","heure":"7h10","lieu":"P.-Lomb.","enfants":["Andy","Lou","Louis C"],"id":"mmnqdk8ciq27"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marido DEROCHE","heure":"7h10","lieu":"NDF","enfants":["Capucine","Lucie","Emma"],"id":"mmnqdk8cqwr4"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h30","lieu":"NDF","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8c0xck"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Nicol BRUMWELL","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sidney"],"id":"mmnqdk8cp7sl"},{"sheet":"Jeudi B","day":"19","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"David PEACOCK","heure":"","lieu":"lycée","enfants":["Sophie","Lucie","Emma","Virgile"],"id":"mmnqdk8cfx9k"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Marika MASSOUTIER","heure":"7h25","lieu":"P.-Lomb.","enfants":["Lucie","Térence","Eyrian"],"id":"mmnqdk8c02k9"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Rachel ROBINSON","heure":"7h05","lieu":"Madeleine","enfants":["Mila","Matilda","Lisa","Cesar","Finnian","Célia"],"id":"mmnqdk8ca106"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Olivier TRONCHON","heure":"8h00","lieu":"Madeleine","enfants":["Isaac","Joshua","Virgile"],"id":"mmnqdk8ch9ww","places":4},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Alexandre BOULLE","heure":"7h05","lieu":"Courmettes","enfants":["Clara","Teiva"],"id":"mmnqdk8cm9gy"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"ALLER","time_group":"8h00","chauffeur":"Ian WALLACE","heure":"7h10","lieu":"NDF","enfants":["Camille","Olivia","Noah","Finnian"],"id":"mmnqdk8cv6ru"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"ALLER","time_group":"8h30","chauffeur":"Lisa VAN HELDEN","heure":"7h30","lieu":"NDF","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8cxkn1"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"RETOUR","time_group":"15h40","chauffeur":"Louise CARSON","heure":"","lieu":"P. Mairie","enfants":["Camille","Olivia","Noah","Finnian","Joshua","Luca"],"id":"mmnqdk8c7r8d"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"RETOUR","time_group":"16h30 16h35","chauffeur":"Alexandra PEACOCK","heure":"","lieu":"P. Mairie","enfants":["Gabriel","Valentin","Sophie","Sidney"],"id":"mmnqdk8ci9h0"},{"sheet":"Vendredi B","day":"20","month":"Mars","direction":"RETOUR","time_group":"16h50","chauffeur":"Louise CARSON","heure":"","lieu":"P. Mairie","enfants":["Camille","Olivia","Noah","Finnian","Joshua","Luca"],"id":"mmnqdk8c5k19"}]));
   localStorage.setItem('covoit_children', JSON.stringify([{"prenom":"Gabriel","nom":"Van Helden","tel":"","chauffeur1":"lisa van helden","tel_chauf1":"0684453371","chauffeur2":"nan","tel_chauf2":"nan","arret":"Notre Dame des Fleurs","ecole":"primaire","classe":"CM2I","parent1_nom":"Lisa VAN HELDEN","parent2_nom":"","parent1_tel":"0684453371","parent2_tel":""},{"prenom":"Valentin","nom":"Van Helden","tel":"","chauffeur1":"lisa van helden","tel_chauf1":"0684453371","chauffeur2":"nan","tel_chauf2":"nan","arret":"Notre Dame des Fleurs","ecole":"primaire","classe":"CM2I","parent1_nom":"Lisa VAN HELDEN","parent2_nom":"","parent1_tel":"0684453371","parent2_tel":""},{"prenom":"Sophie","nom":"Peacock","tel":"","chauffeur1":"Alexandra Peacock","tel_chauf1":"0782592320","chauffeur2":"David Peacock","tel_chauf2":"0651468494","arret":"Notre Dame des Fleurs","ecole":"primaire","classe":"CM2I","parent1_nom":"Alexandra PEACOCK","parent2_nom":"David PEACOCK","parent1_tel":"0782592320","parent2_tel":"0651468494"},{"prenom":"Sidney","nom":"Brumwell","tel":"","chauffeur1":"Brumwell Nicol","tel_chauf1":"0664178660","chauffeur2":"nan","tel_chauf2":"nan","arret":"Notre Dame des Fleurs","ecole":"primaire","classe":"CM","parent1_nom":"Nicol BRUMWELL","parent2_nom":"","parent1_tel":"0664178660","parent2_tel":""},{"prenom":"Mila","nom":"Robinson","tel":"","chauffeur1":"Rachel","tel_chauf1":"0650349578","chauffeur2":"Esteban Lefebvre","tel_chauf2":"0687746704","arret":"Madeleine","ecole":"collège","classe":"6I","parent1_nom":"Rachel ROBINSON","parent2_nom":"","parent1_tel":"0650349578","parent2_tel":"0687746704"},{"prenom":"Matilda","nom":"Moulaert","tel":"695432025","chauffeur1":"Frances","tel_chauf1":"0627884141","chauffeur2":"Nicolas","tel_chauf2":"0627884141","arret":"Pie Lombard","ecole":"collège","classe":"6J","parent1_nom":"Frances MOULAERT","parent2_nom":"Nicolas MOULAERT","parent1_tel":"0627884141","parent2_tel":"0627884141"},{"prenom":"Lisa","nom":"Dalmasso","tel":"0768776694","chauffeur1":"Alexandra Dalmasso","tel_chauf1":"0614707946","chauffeur2":"Julien Dalmasso","tel_chauf2":"0622373573","arret":"Madeleine","ecole":"collège","classe":"6C","parent1_nom":"Alexandra DALMASSO","parent2_nom":"","parent1_tel":"0614707946","parent2_tel":"0622373573"},{"prenom":"Jeanne","nom":"Brega","famille":"BREGA","classe":"6A","ecole":"collège","arret":"Notre Dame des Fleurs","parent1_nom":"Cecile BREGA","parent2_nom":"","parent1_tel":"0610206353","parent2_tel":"","tel":"nan","chauffeur1":"Cecile BREGA","tel_chauf1":"0610206353","chauffeur2":"nan","tel_chauf2":"nan"},{"prenom":"Camille","nom":"Gaucherot","famille":"GAUCHEROT","classe":"5I","ecole":"collège","arret":"Notre Dame des Fleurs","parent1_nom":"Mahé GAUCHEROT","parent2_nom":"Guillaume GAUCHEROT","parent1_tel":"0658052851","parent2_tel":"0612310118","tel":"0745295750","chauffeur1":"Mahé GAUCHEROT","tel_chauf1":"0658052851","chauffeur2":"Guillaume GAUCHEROT","tel_chauf2":"0612310118"},{"prenom":"Olivia","nom":"Van Helden","tel":"0695907799","chauffeur1":"lisa van helden","tel_chauf1":"0684453371","chauffeur2":"nan","tel_chauf2":"nan","arret":"Notre Dame des Fleurs","ecole":"collège","classe":"5I","parent1_nom":"Lisa VAN HELDEN","parent2_nom":"","parent1_tel":"0684453371","parent2_tel":""},{"prenom":"Méane","nom":"Lamare Perrin","famille":"LAMARE PERRIN","classe":"5B","ecole":"collège","arret":"Madeleine","parent1_nom":"Delphine LAMARRE","parent2_nom":"","parent1_tel":"0668807078","parent2_tel":"","tel":"0763329283","chauffeur1":"Delphine LAMARRE","tel_chauf1":"0668807078","chauffeur2":"nan","tel_chauf2":"nan"},{"prenom":"Vanille","nom":"Megy","tel":"0685808958","chauffeur1":"Cecile Megy","tel_chauf1":"0616225831","chauffeur2":"Julien Megy","tel_chauf2":"0675980322","arret":"Pie Lombard","ecole":"collège","classe":"5A","parent1_nom":"Cecile MEGY","parent2_nom":"Julien MEGY","parent1_tel":"0610206323","parent2_tel":"0675980322"},{"prenom":"Noah","nom":"Carson/brillant","tel":"0686776638","chauffeur1":"Louise Carson","tel_chauf1":"0679551488","chauffeur2":"David Brillant","tel_chauf2":"0622730205","arret":"Notre Dame des Fleurs","ecole":"collège","classe":"5I","parent1_nom":"Louise CARSON","parent2_nom":"David BRILLANT","parent1_tel":"0679551488","parent2_tel":"0622730205"},{"prenom":"Cesar","nom":"Samyn","famille":"SAMYN","classe":"5J","ecole":"collège","arret":"Courmettes","parent1_nom":"Anne Sophie SAMYN","parent2_nom":"Anthony SAMYN","parent1_tel":"0786257419","parent2_tel":"0786212904","tel":"0652601600","chauffeur1":"Anne Sophie SAMYN","tel_chauf1":"0786257419","chauffeur2":"Anthony SAMYN","tel_chauf2":"0786212904"},{"prenom":"Andy","nom":"Granaud","tel":"0611866708","chauffeur1":"Léonie Granaud","tel_chauf1":"0629454231","chauffeur2":"Olivier GRANAUD","tel_chauf2":"0661014731","arret":"Madeleine","ecole":"collège","classe":"4J","parent1_nom":"Leonie Granaud","parent2_nom":"Olivier Granaud","parent1_tel":"0629454231","parent2_tel":"0661014731"},{"prenom":"Lou","nom":"Granaud","tel":"0627677188","chauffeur1":"Léonie Granaud","tel_chauf1":"0629454231","chauffeur2":"Olivier GRANAUD","tel_chauf2":"0661014731","arret":"Madeleine","ecole":"collège","classe":"6J","parent1_nom":"Leonie Granaud","parent2_nom":"Olivier Granaud","parent1_tel":"0629454231","parent2_tel":"0661014731"},{"prenom":"Côme","nom":"Bertaina","famille":"BERTAINA","classe":"4I","ecole":"collège","arret":"Pie Lombard","parent1_nom":"Léa BERTAINA","parent2_nom":"Julien BERTAINA","parent1_tel":"0625556752","parent2_tel":"0609282659","tel":"0778090782","chauffeur1":"Léa BERTAINA","tel_chauf1":"0625556752","chauffeur2":"Julien BERTAINA","tel_chauf2":"0609282659"},{"prenom":"Louis C","nom":"Coulon","famille":"COULON","classe":"5E","ecole":"collège","arret":"Madeleine","parent1_nom":"Pierre COULON","parent2_nom":"Laurie COULON","parent1_tel":"0786115198","parent2_tel":"0670726826","tel":"0681818458","chauffeur1":"Pierre COULON","tel_chauf1":"0786115198","chauffeur2":"Laurie COULON","tel_chauf2":"0670726826"},{"prenom":"Finnian","nom":"Wallace","famille":"WALLACE","classe":"5I","ecole":"collège","arret":"Notre Dame des Fleurs","parent1_nom":"Ian WALLACE","parent2_nom":"","parent1_tel":"0789702568","parent2_tel":"","tel":"0669374223","chauffeur1":"Ian WALLACE","tel_chauf1":"0789702568","chauffeur2":"nan","tel_chauf2":"nan"},{"prenom":"Célia","nom":"Sudrial","tel":"0611903697","chauffeur1":"jerome sudrial","tel_chauf1":"0673780308","chauffeur2":"nathalie sudrial","tel_chauf2":"0784484618","arret":"Madeleine","ecole":"collège","classe":"5C","parent1_nom":"Jerome SUDRIAL","parent2_nom":"Nathalie SUDRIAL","parent1_tel":"0673780308","parent2_tel":"0784484618"},{"prenom":"Oscar","nom":"Moulaert","tel":"0768585615","chauffeur1":"Frances","tel_chauf1":"0627884141","chauffeur2":"Nicolas","tel_chauf2":"0627884141","arret":"Courmettes","ecole":"collège","classe":"5J","parent1_nom":"Frances MOULAERT","parent2_nom":"Nicolas MOULAERT","parent1_tel":"0627884141","parent2_tel":"0627884141"},{"prenom":"Capucine","nom":"Deroche","famille":"DEROCHE","classe":"3","ecole":"lycée (incl. 3ème)","arret":"Notre Dame des Fleurs","parent1_nom":"Marido DEROCHE","parent2_nom":"Didier DEROCHE","parent1_tel":"0622257216","parent2_tel":"0613760986","tel":"0787510252","chauffeur1":"Marido DEROCHE","tel_chauf1":"0622257216","chauffeur2":"Didier DEROCHE","tel_chauf2":"0613760986"},{"prenom":"Isaac","nom":"Robinson","tel":"0764307821","chauffeur1":"rachel","tel_chauf1":"0650349578","chauffeur2":"Lefebvre Esteban","tel_chauf2":"0687746704","arret":"Madeleine","ecole":"lycée (incl. 3ème)","classe":"3I","parent1_nom":"Rachel ROBINSON","parent2_nom":"","parent1_tel":"0650349578","parent2_tel":"0687746704"},{"prenom":"Clara","nom":"Charles McMahon","tel":"0788058777","chauffeur1":"Fabienne","tel_chauf1":"0770152962","chauffeur2":"nan","tel_chauf2":"nan","arret":"Courmettes","ecole":"lycée (incl. 3ème)","classe":"3I","parent1_nom":"Fabienne CHARLES MAC-MAHON","parent2_nom":"","parent1_tel":"0770152962","parent2_tel":""},{"prenom":"Teiva","nom":"Boulle","famille":"BOULLE","classe":"3E","ecole":"lycée (incl. 3ème)","arret":"Courmettes","parent1_nom":"Alexandre BOULLE","parent2_nom":"Virginie BOULLE","parent1_tel":"0788570313","parent2_tel":"0785304459","tel":"0640792797","chauffeur1":"Alexandre BOULLE","tel_chauf1":"0788570313","chauffeur2":"Virginie BOULLE","tel_chauf2":"0785304459"},{"prenom":"Léonie","nom":"Samyn","famille":"SAMYN","classe":"3I","ecole":"lycée (incl. 3ème)","arret":"Courmettes","parent1_nom":"Anne Sophie SAMYN","parent2_nom":"Anthony SAMYN","parent1_tel":"0786257419","parent2_tel":"0786212904","tel":"0782653404","chauffeur1":"Anne Sophie SAMYN","tel_chauf1":"0786257419","chauffeur2":"Anthony SAMYN","tel_chauf2":"0786212904"},{"prenom":"Lucie","nom":"Gaucherot","famille":"GAUCHEROT","classe":"2I","ecole":"lycée (incl. 3ème)","arret":"Notre Dame des Fleurs","parent1_nom":"Mahé GAUCHEROT","parent2_nom":"Guillaume GAUCHEROT","parent1_tel":"0612310118","parent2_tel":"0612310118","tel":"0768784140","chauffeur1":"Mahé GAUCHEROT","tel_chauf1":"0612310118","chauffeur2":"Guillaume GAUCHEROT","tel_chauf2":"0612310118"},{"prenom":"Nina","nom":"Megy","tel":"0684460664","chauffeur1":"Cecile Megy","tel_chauf1":"0616225831","chauffeur2":"Julien Megy","tel_chauf2":"0675980322","arret":"Pie Lombard","ecole":"lycée (incl. 3ème)","classe":"2A","parent1_nom":"Cecile MEGY","parent2_nom":"Julien MEGY","parent1_tel":"0610206323","parent2_tel":"0675980322"},{"prenom":"Emma","nom":"Peacock","tel":"0768644741","chauffeur1":"Alexandra Peacock","tel_chauf1":"0782592320","chauffeur2":"David Peacock","tel_chauf2":"0651468494","arret":"Notre Dame des Fleurs","ecole":"lycée (incl. 3ème)","classe":"2J","parent1_nom":"Alexandra PEACOCK","parent2_nom":"David PEACOCK","parent1_tel":"0782592320","parent2_tel":"0651468494"},{"prenom":"Virgile","nom":"Tronchon","famille":"TRONCHON","classe":"2J","ecole":"lycée (incl. 3ème)","arret":"Courmettes","parent1_nom":"Olivier TRONCHON","parent2_nom":"","parent1_tel":"0630434037","parent2_tel":"","tel":"0635156759","chauffeur1":"Olivier TRONCHON","tel_chauf1":"0630434037","chauffeur2":"nan","tel_chauf2":"nan"},{"prenom":"Louis B","nom":"Berthouloux","famille":"BERTHOULOUX","classe":"1J","ecole":"lycée (incl. 3ème)","arret":"Courmettes","parent1_nom":"Sylvie BERTHOULOUX","parent2_nom":"Sylvie BERTHOULOUX","parent1_tel":"0631243376","parent2_tel":"0631243376","tel":"0749923634","chauffeur1":"Sylvie BERTHOULOUX","tel_chauf1":"0631243376","chauffeur2":"Sylvie BERTHOULOUX","tel_chauf2":"0631243376"},{"prenom":"Joshua","nom":"Carson/brillant","tel":"0672918095","chauffeur1":"Louise Carson","tel_chauf1":"0679551488","chauffeur2":"David Brillant","tel_chauf2":"0622730205","arret":"Notre Dame des Fleurs","ecole":"lycée (incl. 3ème)","classe":"1J","parent1_nom":"Louise CARSON","parent2_nom":"David BRILLANT","parent1_tel":"0679551488","parent2_tel":"0622730205"},{"prenom":"Luca","nom":"Sweet","tel":"0782224529","chauffeur1":"Michon","tel_chauf1":"0781882532","chauffeur2":"nan","tel_chauf2":"nan","arret":"Notre Dame des Fleurs","ecole":"lycée (incl. 3ème)","classe":"2I","parent1_nom":"Michon SWEET","parent2_nom":"","parent1_tel":"0781882532","parent2_tel":""},{"prenom":"Térence","nom":"Massoutier","famille":"MASSOUTIER","classe":"2B","ecole":"lycée (incl. 3ème)","arret":"Pie Lombard","parent1_nom":"Marika MASSOUTIER","parent2_nom":"Frederic MASSOUTIER","parent1_tel":"0621207920","parent2_tel":"0621207920","tel":"0622744138","chauffeur1":"Marika MASSOUTIER","tel_chauf1":"0621207920","chauffeur2":"Frederic MASSOUTIER","tel_chauf2":"0621207920"},{"prenom":"Sam","nom":"Charles McMahon","tel":"0770152874","chauffeur1":"Fabienne","tel_chauf1":"0770152962","chauffeur2":"nan","tel_chauf2":"nan","arret":"Courmettes","ecole":"lycée (incl. 3ème)","classe":"T I","parent1_nom":"Fabienne CHARLES MAC-MAHON","parent2_nom":"","parent1_tel":"0770152962","parent2_tel":""},{"prenom":"Eyrian","nom":"Massoutier","famille":"MASSOUTIER","classe":"T I","ecole":"lycée (incl. 3ème)","arret":"Pie Lombard","parent1_nom":"Marika MASSOUTIER","parent2_nom":"Frederic MASSOUTIER","parent1_tel":"0621207920","parent2_tel":"0621207920","tel":"0768220012","chauffeur1":"Marika MASSOUTIER","tel_chauf1":"0621207920","chauffeur2":"Frederic MASSOUTIER","tel_chauf2":"0621207920"}]));
   localStorage.setItem('covoit_drivers', JSON.stringify([{"nom":"Léa BERTAINA","tel":"0625556752","email":"","places":"","note":"","famille":"BERTAINA"},{"nom":"Sylvie BERTHOULOUX","tel":"0631243376","email":"","places":"","note":"","famille":"BERTHOULOUX"},{"nom":"Alexandre BOULLE","tel":"0788570313","email":"","places":"","note":"","famille":"BOULLE"},{"nom":"Virginie BOULLE","tel":"0785304459","email":"","places":"","note":"","famille":"BOULLE"},{"nom":"David BRILLANT","tel":"0622730205","email":"","places":"","note":"","famille":"BRILLANT/CARSON"},{"nom":"Nicol BRUMWELL","tel":"0664178660","email":"","places":"","note":"","famille":"BRUMWELL"},{"nom":"Louise CARSON","tel":"0679551488","email":"","places":"","note":"","famille":"BRILLANT/CARSON"},{"nom":"Pierre COULON","tel":"0786115198","email":"","places":"","note":"","famille":"COULON"},{"nom":"Alexandra DALMASSO","tel":"0614707946","email":"","places":"","note":"","famille":"DALMASSO"},{"nom":"Marido DEROCHE","tel":"0622257216","email":"","places":"","note":"","famille":"DEROCHE"},{"nom":"Mahé GAUCHEROT","tel":"0612310118","email":"","places":"4","note":"","famille":"GAUCHEROT"},{"nom":"Leonie GRANAUD","tel":"0629454231","email":"","places":"","note":"","famille":"GRANAUD"},{"nom":"Olivier GRANAUD","tel":"0661014731","email":"","places":"","note":"","famille":"GRANAUD"},{"nom":"Lisa VAN HELDEN","tel":"0684453371","email":"","places":"","note":"","famille":"VAN HELDEN"},{"nom":"Delphine LAMARRE","tel":"0668807078","email":"","places":"","note":"","famille":"LAMARRE"},{"nom":"Fabienne CHARLES MAC-MAHON","tel":"0770152962","email":"","places":"","note":"","famille":"CHARLES MAC-MAHON"},{"nom":"Marika MASSOUTIER","tel":"0621207920","email":"","places":"","note":"","famille":"MASSOUTIER"},{"nom":"Cecile MEGY","tel":"0610206323","email":"","places":"","note":"","famille":"MEGY"},{"nom":"Julien MEGY","tel":"0675980322","email":"","places":"","note":"","famille":"MEGY"},{"nom":"Frances MOULAERT","tel":"0627884141","email":"","places":"","note":"","famille":"MOULAERT"},{"nom":"Nicolas MOULAERT","tel":"0627884141","email":"","places":"","note":"","famille":"MOULAERT"},{"nom":"Alexandra PEACOCK","tel":"0782592320","email":"","places":"","note":"","famille":"PEACOCK"},{"nom":"David PEACOCK","tel":"0651468494","email":"","places":"","note":"","famille":"PEACOCK"},{"nom":"Rachel ROBINSON","tel":"0650349578","email":"","places":"","note":"","famille":"ROBINSON"},{"nom":"Anne Sophie SAMYN","tel":"0786257419","email":"","places":"","note":"","famille":"SAMYN"},{"nom":"Jerome SUDRIAL","tel":"0673780308","email":"","places":"","note":"","famille":"SUDRIAL"},{"nom":"Nathalie SUDRIAL","tel":"0784484618","email":"","places":"","note":"","famille":"SUDRIAL"},{"nom":"Michon SWEET","tel":"0781882532","email":"","places":"","note":"","famille":"SWEET"},{"nom":"Ian WALLACE","tel":"0789702568","email":"","places":"","note":"","famille":"WALLACE"},{"nom":"Olivier TRONCHON","tel":"0630434037","places":"4","email":"","note":"","famille":"TRONCHON"},{"nom":"Anthony SAMYN","tel":"0786212904","places":"4","email":"","note":"","famille":"SAMYN"},{"nom":"Julien BERTAINA","tel":"0609282659","places":"4","email":"","note":"","famille":"BERTAINA"},{"nom":"Thierry BERTHOULOUX","tel":"0631243376","places":"","email":"","note":"","famille":"BERTHOULOUX"},{"nom":"Laurie COULON","tel":"0670726826","places":"4","email":"","note":"","famille":"COULON"},{"nom":"Julien DALMASSO","tel":"0622373573","places":"4","email":"","note":"","famille":"DALMASSO"},{"nom":"Didier DEROCHE","tel":"0613760986","places":"4","email":"","note":"","famille":"DEROCHE"},{"nom":"Guillaume GAUCHEROT","tel":"0612310118","places":"4","email":"","note":"","famille":"GAUCHEROT"},{"nom":"Frederic MASSOUTIER","tel":"0621207920","places":"4","email":"","note":"","famille":"MASSOUTIER"},{"nom":"Cecile BREGA","tel":"0610206353","places":"4","email":"","note":"","famille":"BREGA"}]));
@@ -1335,21 +1738,42 @@ function addRefreshButton() {
   localStorage.setItem('covoit_drivers_deleted', JSON.stringify(["Olivier Tronchon ", "Antony NOWE", "Virginie BOULLE", "Virgine BOULLE"]));
 })();
 
-// Démarrage : charger depuis GitHub, fallback sur les données embarquées
+// Démarrage : affichage immédiat avec les données locales, puis synchro GitHub
 (async function() {
+  registerDays(LEGACY_DAYS);
   loadExtraDays();
-  filterPastDays();
   loadSavedData();
+  rebuildDays();
   addRefreshButton();
-  const ok = await loadFromGitHub();
-  if (ok) {
-    filterPastDays();
-    loadSavedData();
-  }
+  updateMeBadge();
+  updateTodayLabel();
   initDriverSelect();
   initChildSelect();
   switchTab('chauffeur');
+
+  const ok = await loadFromGitHub();
+  if (ok) {
+    loadSavedData();
+    rebuildDays();
+    initDriverSelect();
+    initChildSelect();
+    updateMeBadge();
+    updateTodayLabel();
+    const active = document.querySelector('.screen.active');
+    if (active && active.id === 'screen-planning') initPlanning();
+    if (active && active.id === 'screen-admin') renderAdminHome();
+  }
 })();
+
+// Sous-titre du header : la date du jour
+function updateTodayLabel() {
+  const el = document.getElementById('today-label');
+  if (!el) return;
+  const now = new Date();
+  const d = getDefaultDay();
+  const jour = JOURS_FR[now.getDay()] + ' ' + now.getDate() + ' ' + MOIS_FR[now.getMonth()];
+  el.textContent = (d && isToday(d)) ? jour : jour + ' · prochain trajet ' + (d ? d.label : '—');
+}
 
 function renderAdminEquityTable() {
   const container = document.getElementById('asec-recap');
@@ -1375,7 +1799,7 @@ function renderAdminEquityTable() {
   let newArchived = 0;
   allRides.forEach(r => {
     if (archivedIds.has(r.id)) return;
-    const day = DAYS.find(d => d.sheet === r.sheet);
+    const day = ALL_DAYS.find(d => d.sheet === r.sheet);
     if (!day) return;
     const rideDate = day.dateObj;
     const archivable = rideDate < todayMidnight || (
@@ -1394,7 +1818,7 @@ function renderAdminEquityTable() {
 
   // Combiner archive + trajets d'aujourd'hui non encore archivés pour le calcul
   const todayRides = allRides.filter(r => {
-    const day = DAYS.find(d => d.sheet === r.sheet);
+    const day = ALL_DAYS.find(d => d.sheet === r.sheet);
     return day && day.dateObj.toDateString() === now.toDateString();
   });
   const allForCalc = [...archive];
@@ -1615,7 +2039,7 @@ function renderAdminHome() {
 
   // Build day tabs for admin
   const tabs = document.getElementById('admin-day-tabs');
-  const todayIdx = getTodayIndex();
+  const todayIdx = Math.max(0, getTodayIndex());
   DAYS.forEach((d, i) => {
     const btn = document.createElement('button');
     btn.className = 'day-tab' + (i === todayIdx ? ' active' : '');
@@ -1627,7 +2051,7 @@ function renderAdminHome() {
     };
     tabs.appendChild(btn);
   });
-  renderAdminRidesList(DAYS[todayIdx].sheet, DAYS[todayIdx].date);
+  if (DAYS[todayIdx]) renderAdminRidesList(DAYS[todayIdx].sheet, DAYS[todayIdx].date);
   renderAdminChildrenList();
   renderAdminDriversList();
   // Restore last active tab
@@ -2463,6 +2887,9 @@ document.addEventListener('click', function(e) {
   const modal = document.getElementById('admin-modal');
   const scroll = document.getElementById('admin-modal-scroll');
   if (modal && (e.target === modal || e.target === scroll)) closeModal();
+  const app = document.getElementById('app-modal');
+  const appScroll = document.getElementById('app-modal-scroll');
+  if (app && (e.target === app || e.target === appScroll)) closeAppModal();
 });
 
 // ---- TOAST ----
@@ -2496,43 +2923,10 @@ function refreshAll() {
   while (cSel.options.length > 1) cSel.remove(1);
   [...DATA.children].sort((a,b)=>a.prenom.localeCompare(b.prenom,'fr')).forEach(c => { const o = document.createElement('option'); o.value = c.prenom; const ini = (c.nom && c.nom!=='nan') ? ' ' + c.nom.trim()[0].toUpperCase() + '.' : ''; o.textContent = c.prenom + ini; cSel.appendChild(o); });
   if (curChild) { cSel.value = curChild; loadChildInfo(curChild); }
+
+  // Refresh planning si déjà affiché
+  if (document.querySelector('#day-tabs-planning .day-tab')) initPlanning();
 }
-</script>
-<script>
-
-// DIAGNOSTIC PATCH - injecté au démarrage
-window._origAdminTab = window.adminTab;
-window.adminTab = function(tab) {
-  console.log('[DIAG] adminTab appelée avec tab=' + tab);
-  document.title = 'adminTab(' + tab + ')';
-  try {
-    window._origAdminTab(tab);
-    console.log('[DIAG] adminTab(' + tab + ') terminée sans erreur');
-  } catch(e) {
-    console.error('[DIAG] adminTab(' + tab + ') CRASH:', e);
-    alert('CRASH dans adminTab(' + tab + '): ' + e.message);
-  }
-};
-
-window._origRenderAdminHome = window.renderAdminHome;
-window.renderAdminHome = function() {
-  console.log('[DIAG] renderAdminHome appelée');
-  try {
-    window._origRenderAdminHome();
-    console.log('[DIAG] renderAdminHome terminée');
-    // Vérifier que les éléments existent après le rendu
-    ['atab-trajets','atab-chauffeurs','atab-enfants','atab-recap',
-     'asec-trajets','asec-chauffeurs','asec-enfants','asec-recap',
-     'admin-drivers-list','admin-children-list'].forEach(function(id) {
-      var el = document.getElementById(id);
-      console.log('[DIAG] #' + id + ': ' + (el ? 'OK display=' + el.style.display : 'MANQUANT'));
-    });
-  } catch(e) {
-    console.error('[DIAG] renderAdminHome CRASH:', e);
-    alert('CRASH dans renderAdminHome: ' + e.message);
-  }
-};
-
 </script>
 </body>
 </html>
