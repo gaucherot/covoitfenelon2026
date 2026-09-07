@@ -906,8 +906,39 @@ function loadDriverRides(driver) {
   container.innerHTML = html;
 }
 
-// Agenda de la famille : ce que nous conduisons et où voyagent nos enfants,
-// tous parents confondus, sans avoir à sélectionner chaque conducteur.
+// ── Rôles au sein de la famille ────────────────────────────────────────────
+// Le conducteur principal est le parent 1 des fiches enfants, le secondaire
+// le parent 2. Le rôle sert à lire l'agenda d'un coup d'œil.
+function rolesFamille() {
+  const id = getIdentity();
+  const roles = {};
+  if (!id) return roles;
+  DATA.children.filter(c => (id.enfants || []).includes(c.prenom)).forEach(c => {
+    const p1 = (c.parent1_nom && c.parent1_nom !== 'nan') ? c.parent1_nom : (c.chauffeur1 !== 'nan' ? c.chauffeur1 : '');
+    const p2 = (c.parent2_nom && c.parent2_nom !== 'nan') ? c.parent2_nom : (c.chauffeur2 !== 'nan' ? c.chauffeur2 : '');
+    if (p1 && !roles[p1]) roles[p1] = 'principal';
+    if (p2 && !roles[p2]) roles[p2] = 'secondaire';
+  });
+  return roles;
+}
+function estMoi(nom) {
+  const m = monNom();
+  return !!m && normName(m) === normName(nom);
+}
+// Pastille compacte : qui conduit, et à quel titre
+function pastilleConducteur(nom, roles) {
+  const moi = estMoi(nom);
+  const role = roles[Object.keys(roles).find(k => normName(k) === normName(nom))] || '';
+  const court = nom.split(' ')[0];
+  const fond = moi ? 'rgba(67,233,123,0.16)' : 'rgba(108,99,255,0.13)';
+  const bord = moi ? 'rgba(67,233,123,0.45)' : 'rgba(108,99,255,0.3)';
+  const teinte = moi ? 'var(--accent3)' : 'var(--accent)';
+  const tag = role === 'principal' ? '1er' : role === 'secondaire' ? '2e' : '';
+  return `<span style="display:inline-flex;align-items:center;gap:4px;background:${fond};border:1px solid ${bord};border-radius:20px;padding:1px 8px;font-size:11px;font-weight:700;color:${teinte};white-space:nowrap;">
+    ${moi ? 'Moi' : escHtml(court)}${tag ? `<span style="opacity:0.6;font-weight:600;">${tag}</span>` : ''}</span>`;
+}
+
+// ── AGENDA CHAUFFEUR ───────────────────────────────────────────────────────
 function renderFamilyAgenda() {
   const container = document.getElementById('driver-rides');
   if (!container) return;
@@ -915,47 +946,108 @@ function renderFamilyAgenda() {
   if (!id) { container.innerHTML = ''; return; }
 
   const parents = id.parents || [];
-  const miens   = myChildren();
+  const miens = myChildren();
+  const roles = rolesFamille();
   const visibles = new Set(DAYS.map(d => d.sheet));
-  const conduits = DATA.rides.filter(r => visibles.has(r.sheet) && parents.includes(r.chauffeur));
-  const ailleurs = DATA.rides.filter(r => visibles.has(r.sheet) && !parents.includes(r.chauffeur)
-                                       && r.enfants.some(e => miens.includes(e)));
-
-  const placesOffertes = conduits.reduce((n, r) => n + r.enfants.filter(e => !miens.includes(e)).length, 0);
-  const placesPrises   = ailleurs.reduce((n, r) => n + r.enfants.filter(e => miens.includes(e)).length, 0);
-
-  let html = `
-    <div class="info-block" style="margin-bottom:14px;">
-      <div class="info-icon" style="background:rgba(108,99,255,0.15);">👪</div>
-      <div>
-        <div class="info-label">Agenda de la famille ${escHtml(id.label)}</div>
-        <div class="info-value">${conduits.length} trajet${conduits.length > 1 ? 's' : ''} conduit${conduits.length > 1 ? 's' : ''} · ${placesOffertes} place${placesOffertes > 1 ? 's' : ''} offerte${placesOffertes > 1 ? 's' : ''} · ${placesPrises} prise${placesPrises > 1 ? 's' : ''} ailleurs</div>
-        ${parents.length ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${parents.map(escHtml).join(' · ')}</div>` : ''}
-      </div>
-    </div>`;
-
-  if (!conduits.length && !ailleurs.length) {
-    html += '<div class="empty"><div class="empty-emoji">🗓️</div><div class="empty-text">Rien de prévu pour votre famille</div></div>';
-    container.innerHTML = html;
-    return;
-  }
+  const conduits = DATA.rides.filter(r => visibles.has(r.sheet) && parents.some(p => normName(p) === normName(r.chauffeur)));
+  const aMoi = conduits.filter(r => estMoi(r.chauffeur));
+  const offertes = conduits.reduce((n, r) => n + r.enfants.filter(e => !miens.includes(e)).length, 0);
 
   const ph = h => { if (!h) return 9999; const m = (h+'').replace('h',':').match(/(\d+):?(\d*)/); return m ? parseInt(m[1])*60+(parseInt(m[2])||0) : 9999; };
-  const tri = arr => arr.slice().sort((a, b) => (a.direction === b.direction ? 0 : a.direction === 'ALLER' ? -1 : 1) || ph(a.heure) - ph(b.heure));
+
+  let html = `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:800;">👪 ${escHtml(id.label)} · ${conduits.length} trajet${conduits.length > 1 ? 's' : ''} à conduire</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${isEnfant() ? '' : 'dont ' + aMoi.length + ' pour moi · '}${offertes} place${offertes > 1 ? 's' : ''} offerte${offertes > 1 ? 's' : ''}</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:6px;">1er = conducteur principal · 2e = secondaire</div>
+    </div>`;
+
+  let vide = true;
+  DAYS.forEach(d => {
+    const jour = conduits.filter(r => r.sheet === d.sheet)
+      .sort((a, b) => (a.direction === b.direction ? 0 : a.direction === 'ALLER' ? -1 : 1) || ph(a.heure) - ph(b.heure));
+    const auj = isToday(d);
+    html += `<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);${auj ? 'background:rgba(108,99,255,0.06);border-radius:8px;padding-left:6px;' : ''}">
+      <div style="flex-shrink:0;width:56px;font-size:11px;font-weight:800;color:${auj ? 'var(--accent)' : 'var(--text-muted)'};padding-top:2px;">${escHtml(d.label)}</div>
+      <div style="flex:1;min-width:0;">`;
+    if (!jour.length) {
+      html += `<div style="font-size:12px;color:var(--text-muted);opacity:0.5;">—</div>`;
+    } else {
+      vide = false;
+      jour.forEach(r => {
+        const cap = getCapacityInfo(r);
+        const passagers = r.enfants.length ? r.enfants.map(e => e.split(' ')[0]).join(', ') : 'personne';
+        html += `<div style="margin-bottom:5px;">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:800;color:${r.direction === 'ALLER' ? 'var(--aller)' : 'var(--retour)'};">${r.direction === 'ALLER' ? '➡ Aller' : '⬅ Retour'}</span>
+            <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;">${escHtml(r.heure || r.time_group)}</span>
+            ${pastilleConducteur(r.chauffeur, roles)}
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);opacity:0.75;margin-top:1px;line-height:1.4;">
+            ${escHtml(r.lieu || '—')} · ${r.enfants.length}/${cap.places}${cap.free <= 0 ? ' complet' : ''} · ${escHtml(passagers)}
+          </div>
+        </div>`;
+      });
+    }
+    html += `</div></div>`;
+  });
+
+  if (vide) html += '<div class="empty" style="padding:20px;"><div class="empty-text">Aucun trajet à conduire cette quinzaine</div></div>';
+  container.innerHTML = html;
+}
+
+// ── SEMAINE DES ENFANTS ────────────────────────────────────────────────────
+// Pour chaque jour et chaque enfant : avec qui il part, avec qui il rentre.
+function renderFamilyChildrenWeek() {
+  const container = document.getElementById('child-info');
+  if (!container) return;
+  const id = getIdentity();
+  if (!id) { container.innerHTML = ''; return; }
+  const miens = myChildren();
+  const roles = rolesFamille();
+
+  const motif = (prenom, sheet, dir) => {
+    try { return localStorage.getItem('absence_' + prenom + '_' + sheet + '_' + dir) || ''; } catch(e) { return ''; }
+  };
+  const libelle = m => m === 'bus' ? '🚌 bus' : m === 'none' ? '✅ rien à prévoir' : m === 'sick' ? '🤒 malade' : m === 'vssp' ? '🚗 sa voiture' : '';
+
+  let html = `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:800;">🧒 ${miens.map(escHtml).join(' · ') || 'Aucun enfant'}</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:5px;">➡ avec qui il part · ⬅ avec qui il rentre</div>
+    </div>`;
 
   DAYS.forEach(d => {
-    const c = tri(conduits.filter(r => r.sheet === d.sheet));
-    const a = tri(ailleurs.filter(r => r.sheet === d.sheet));
-    if (!c.length && !a.length) return;
-    html += `<div class="section-title">${escHtml(d.date)}${isToday(d) ? ' · aujourd\'hui' : ''}</div>`;
-    if (c.length) {
-      html += `<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.5px;margin:6px 0;">🚗 Nous conduisons</div>`;
-      c.forEach(r => { html += rideCardHtml(r, true); });
-    }
-    if (a.length) {
-      html += `<div style="font-size:11px;font-weight:700;color:var(--accent4);text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🧒 Nos enfants avec une autre famille</div>`;
-      a.forEach(r => { html += rideCardHtml(r, true); });
-    }
+    const auj = isToday(d);
+    html += `<div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);${auj ? 'background:rgba(108,99,255,0.06);border-radius:8px;padding-left:6px;' : ''}">
+      <div style="font-size:11px;font-weight:800;color:${auj ? 'var(--accent)' : 'var(--text-muted)'};margin-bottom:4px;">${escHtml(d.label)}${auj ? " · aujourd'hui" : ''}</div>`;
+    miens.forEach(prenom => {
+      const h = horairesDuJour(prenom, d.sheet);
+      html += `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:3px;">
+        <div onclick="goToChild('${jsStr(prenom)}')" style="flex-shrink:0;width:66px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">${escHtml(prenom)}</div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">`;
+      ['ALLER','RETOUR'].forEach(dir => {
+        const r = DATA.rides.find(x => x.sheet === d.sheet && x.direction === dir && x.enfants.includes(prenom));
+        const fl = dir === 'ALLER' ? '➡' : '⬅';
+        const heureEcole = h ? (dir === 'ALLER' ? h.r : h.s) : '';
+        if (r) {
+          html += `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11px;">
+            <span>${fl}</span><span style="font-weight:700;font-variant-numeric:tabular-nums;">${escHtml(r.heure || r.time_group)}</span>
+            ${pastilleConducteur(r.chauffeur, roles)}
+            <span style="color:${stopColor(r.lieu)};">${escHtml(r.lieu || '')}</span>
+          </div>`;
+        } else {
+          const m = libelle(motif(prenom, d.sheet, dir));
+          html += `<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);">
+            <span>${fl}</span>${m ? `<span>${m}</span>` : `<span style="color:var(--accent2);font-weight:700;">à placer</span>`}
+            ${heureEcole ? `<span style="opacity:0.6;">école ${escHtml(heureEcole)}</span>` : ''}
+            ${m ? '' : `<button onclick="goToPlanningDay('${jsStr(d.sheet)}')" style="background:rgba(108,99,255,0.15);border:none;color:var(--accent);padding:1px 7px;border-radius:7px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">chercher</button>`}
+          </div>`;
+        }
+      });
+      html += `</div></div>`;
+    });
+    html += `</div>`;
   });
 
   container.innerHTML = html;
@@ -966,6 +1058,13 @@ function initChildSelect() {
   const sel = document.getElementById('child-select');
   const cur = sel.value;
   while (sel.options.length > 1) sel.remove(1);
+  const id = getIdentity();
+  if (id && (id.enfants || []).length) {
+    const o = document.createElement('option');
+    o.value = '__mesenfants__';
+    o.textContent = '👪 Ma semaine — ' + id.enfants.join(', ');
+    sel.appendChild(o);
+  }
   const sorted = [...DATA.children].sort((a, b) => a.prenom.localeCompare(b.prenom, 'fr'));
   sorted.forEach(c => {
     const opt = document.createElement('option');
@@ -974,11 +1073,14 @@ function initChildSelect() {
     opt.textContent = c.prenom + initial;
     sel.appendChild(opt);
   });
-  if (cur) sel.value = cur;
+  if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+  else if (id && (id.enfants || []).length) sel.value = '__mesenfants__';
+  loadChildInfo(sel.value);
 }
 
 function loadChildInfo(prenom) {
   const container = document.getElementById('child-info');
+  if (prenom === '__mesenfants__') { renderFamilyChildrenWeek(); return; }
   if (!prenom) { container.innerHTML = ''; return; }
   
   const child = DATA.children.find(c => c.prenom === prenom);
@@ -1432,6 +1534,7 @@ function setIdentity(id) {
     else { localStorage.removeItem('covoit_identity'); localStorage.removeItem('covoit_me'); }
   } catch(e) {}
   updateMeBadge();
+  try { updateTodayLabel(); } catch(e) {}
 }
 function isIdentified() { return !!getIdentity(); }
 // L'utilisateur est-il un élève ? Il ne gère alors que lui et sa fratrie.
@@ -3414,11 +3517,7 @@ function refreshAll() {
   initDriverSelect();
 
   // Refresh child select
-  const cSel = document.getElementById('child-select');
-  const curChild = cSel.value;
-  while (cSel.options.length > 1) cSel.remove(1);
-  [...DATA.children].sort((a,b)=>a.prenom.localeCompare(b.prenom,'fr')).forEach(c => { const o = document.createElement('option'); o.value = c.prenom; const ini = (c.nom && c.nom!=='nan') ? ' ' + c.nom.trim()[0].toUpperCase() + '.' : ''; o.textContent = c.prenom + ini; cSel.appendChild(o); });
-  if (curChild) { cSel.value = curChild; loadChildInfo(curChild); }
+  initChildSelect();
 
   // Refresh planning si déjà affiché
   if (document.querySelector('#day-tabs-planning .day-tab')) initPlanning();
