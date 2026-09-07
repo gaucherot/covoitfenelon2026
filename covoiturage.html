@@ -692,6 +692,7 @@ function getDC() {
   return JSON.parse(JSON.stringify(DRIVER_CHILDREN));
 }
 function saveDC(dc) {
+  markDirty('driver_children');
   localStorage.setItem('covoit_driver_children', JSON.stringify(dc));
 }
 // Rebuild CHILD_DRIVERS inverse from a DC map
@@ -1626,7 +1627,7 @@ function saveProposeRide() {
   });
   registerDriver(chauffeur);
 
-  saveData();
+  markDirty('rides'); saveData();
   closeAppModal();
   showToast('✅ Trajet proposé !');
   planningDay = sheet;
@@ -1724,6 +1725,7 @@ function joinRide(rideId, prenom) {
     });
   }
 
+  markDirty('rides');
   r.enfants.push(prenom);
   r.ajouts = r.ajouts || {};
   r.ajouts[prenom] = { par: id.label, qui: id.who || '', le: new Date().toISOString() };
@@ -1746,6 +1748,7 @@ function leaveRide(rideId, prenom) {
     if (!confirm(prenom + ' est de la famille ' + fam + ' et n\'a pas été inscrit par vous.\nLe retirer quand même ?')) return;
   } else if (!confirm('Retirer ' + prenom + ' de ce trajet ?')) return;
 
+  markDirty('rides');
   r.enfants = r.enfants.filter(e => e !== prenom);
   if (r.ajouts) delete r.ajouts[prenom];
   saveData();
@@ -1798,6 +1801,12 @@ let _ghToken  = null;
 let _ghSha    = null;
 let _ghLoaded = false;
 
+// Sections que CETTE session a modifiées. Tout le reste sera repris du serveur
+// au moment d'enregistrer : un onglet resté ouvert ne doit pas réécrire un
+// annuaire qu'il n'a pas touché avec sa copie périmée.
+const _modifie = new Set();
+function markDirty(section) { _modifie.add(section); }
+
 function getGhToken() { return _ghToken || localStorage.getItem('gh_token') || null; }
 function setGhToken(t) { _ghToken = t; localStorage.setItem('gh_token', t); }
 
@@ -1830,8 +1839,37 @@ async function loadFromGitHub() {
   }
 }
 
-async function saveToGitHub(showMsg) {
+// Relit le serveur et adopte les sections que cette session n'a pas modifiées
+async function rebaseOnRemote() {
   try {
+    const res = await fetch(PROXY_URL + '?t=' + Date.now());
+    if (!res.ok) return false;
+    const meta = await res.json();
+    const binary = atob(meta.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const c = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    _ghSha = meta.sha;
+
+    if (!_modifie.has('rides') && c.rides) {
+      DATA.rides = c.rides; localStorage.setItem('covoit_rides', JSON.stringify(c.rides));
+    }
+    if (!_modifie.has('children') && c.children) {
+      DATA.children = c.children; localStorage.setItem('covoit_children', JSON.stringify(c.children));
+    }
+    if (!_modifie.has('drivers') && c.drivers) localStorage.setItem('covoit_drivers', JSON.stringify(c.drivers));
+    if (!_modifie.has('drivers') && c.drivers_deleted) localStorage.setItem('covoit_drivers_deleted', JSON.stringify(c.drivers_deleted));
+    if (!_modifie.has('driver_children') && c.driver_children) localStorage.setItem('covoit_driver_children', JSON.stringify(c.driver_children));
+    if (!_modifie.has('equity_archive') && c.equity_archive) localStorage.setItem('covoit_equity_archive', JSON.stringify(c.equity_archive));
+    if (c.extra_days) registerDays(c.extra_days); // les jours se cumulent, jamais de perte
+    return true;
+  } catch(e) { console.error('rebaseOnRemote:', e); return false; }
+}
+
+async function saveToGitHub(showMsg, essai) {
+  essai = essai || 0;
+  try {
+    await rebaseOnRemote();
     const data = {
       rides:           DATA.rides,
       children:        DATA.children,
@@ -1860,17 +1898,8 @@ async function saveToGitHub(showMsg) {
     });
     // Conflit : un autre parent a enregistré entre temps → on relit, on refusionne, on réessaie
     if (res.status === 409 || res.status === 422) {
-      const fresh = await fetch(PROXY_URL + '?t=' + Date.now());
-      if (fresh.ok) {
-        const meta = await fresh.json();
-        _ghSha = meta.sha;
-        body.sha = meta.sha;
-        res = await fetch(PROXY_URL, {
-          method:  'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(body)
-        });
-      }
+      // Quelqu'un a enregistré entre temps : on repart de sa version avant de réessayer
+      if (essai < 2 && await rebaseOnRemote()) return await saveToGitHub(showMsg, essai + 1);
     }
     if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || err.error || 'HTTP ' + res.status); }
     const result = await res.json();
@@ -2026,6 +2055,7 @@ function renderAdminEquityTable() {
     }
   });
   if (newArchived > 0) {
+    markDirty('equity_archive');
     localStorage.setItem('covoit_equity_archive', JSON.stringify(archive));
     saveToGitHub(false);
   }
@@ -2318,6 +2348,7 @@ function getDriversData() {
 }
 
 function saveDriversData(drivers) {
+  markDirty('drivers');
   localStorage.setItem('covoit_drivers', JSON.stringify(drivers));
 }
 
@@ -2534,6 +2565,7 @@ function saveDriverForm() {
     const blOldIdx = blacklist.indexOf(oldName);
     if (blOldIdx >= 0) blacklist.splice(blOldIdx, 1);
   }
+  markDirty('drivers');
   localStorage.setItem('covoit_drivers_deleted', JSON.stringify(blacklist));
 
   // Mettre à jour DRIVER_CHILDREN depuis les checkboxes
@@ -2569,6 +2601,7 @@ function deleteDriver(driverName) {
   let blacklist = [];
   try { blacklist = JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]'); } catch(e) {}
   if (!blacklist.includes(driverName)) blacklist.push(driverName);
+  markDirty('drivers');
   localStorage.setItem('covoit_drivers_deleted', JSON.stringify(blacklist));
   saveDriversData(drivers);
   renderAdminDriversList();
@@ -2826,7 +2859,7 @@ function saveRideForm() {
   } else {
     DATA.rides.push({ id: genId(), sheet, day: dayParts[1]||'', month: dayParts[2]||'', direction, heure, time_group, lieu, chauffeur, enfants, places });
   }
-  saveData();
+  markDirty('rides'); saveData();
   closeModal();
   // Refresh the current admin day view
   const activeTab = document.querySelector('#admin-day-tabs .day-tab.active');
@@ -2843,7 +2876,7 @@ function saveRideForm() {
 function deleteRide(rideId) {
   if (!confirm('Supprimer ce trajet ?')) return;
   DATA.rides = DATA.rides.filter(r => r.id !== rideId);
-  saveData();
+  markDirty('rides'); saveData();
   const activeTab = document.querySelector('#admin-day-tabs .day-tab.active');
   if (activeTab) {
     const idx = [...document.querySelectorAll('#admin-day-tabs .day-tab')].indexOf(activeTab);
@@ -3084,7 +3117,7 @@ function saveChildForm() {
   });
   saveDriversData(drivers);
 
-  saveData();
+  markDirty('children'); saveData();
   closeModal();
   renderAdminChildrenList();
   refreshAll();
@@ -3095,7 +3128,7 @@ function saveChildForm() {
 function deleteChild(idx) {
   if (!confirm(`Supprimer ${DATA.children[idx].prenom} ?`)) return;
   DATA.children.splice(idx, 1);
-  saveData();
+  markDirty('children'); saveData();
   renderAdminChildrenList();
   refreshAll();
   showToast('🗑️ Enfant supprimé');
