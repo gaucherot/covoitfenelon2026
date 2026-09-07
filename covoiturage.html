@@ -1218,7 +1218,7 @@ function renderPlanning(sheet, dateLabel) {
 // 2. « Je mets mon enfant »    → un autre parent inscrit son enfant
 // ============================================================
 
-const TIME_OPTIONS = ['7h05','7h10','7h15','7h20','7h25','7h30','7h40','7h45','7h50','8h00','8h10','8h15','8h20','8h30','8h55','9h05','9h25','9h50','12h00','12h55','13h50','14h45','15h40','16h30','16h50','17h20','17h45','18h45'];
+const TIME_OPTIONS = ['7h00','7h05','7h10','7h15','7h20','7h25','7h30','7h40','7h45','7h50','8h00','8h10','8h15','8h20','8h30','8h55','9h05','9h25','9h50','10h10','11h05','12h00','12h55','13h50','14h45','15h40','15h55','16h30','16h50','17h20','17h45','18h45'];
 const LIEUX_ALLER  = ['NDF','Madeleine','Pie Lombard','Courmettes'];
 const LIEUX_RETOUR = ['RP du Sud','P. Mairie','Bureau CPE','S. des Profs','Gare SNCF','parvis primaire','lycée'];
 
@@ -2664,7 +2664,7 @@ function openRideForm(rideId) {
   const allDrivers = [...new Set(DATA.rides.map(r => r.chauffeur))].sort();
 
   const dayOptions = DAYS.map(d => `<option value="${d.sheet}" ${ride && ride.sheet === d.sheet ? 'selected' : ''}>${d.date}</option>`).join('');
-  const timeOptions = ['7h05','7h10','7h15','7h20','7h25','7h30','7h40','7h45','7h50','8h00','8h10','8h15','8h20','8h30','8h55','9h05','9h25','9h50','12h00','12h55','13h50','14h45','15h40','16h30','16h50','17h20','17h45','18h45']
+  const timeOptions = TIME_OPTIONS
     .map(t => `<option value="${t}" ${ride && (ride.heure === t || ride.time_group === t) ? 'selected' : ''}>${t}</option>`).join('');
   const lieuxAller = ['NDF','Madeleine','Pie Lombard','Courmettes'];
   const lieuxRetour = ['RP du Sud','P. Mairie','Bureau CPE','S. des Profs','Gare SNCF','parvis primaire','lycée'];
