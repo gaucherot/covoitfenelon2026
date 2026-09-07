@@ -1007,6 +1007,7 @@ function loadChildInfo(prenom) {
     if (!rAller && !rRetour && !rides.length) return; // skip if no rides at all (handled below)
 
     html += `<div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px;">${d.date}</div>`;
+    html += horairesBandeauHtml(prenom, d.sheet);
 
     ['ALLER','RETOUR'].forEach(dir => {
       const r = dir === 'ALLER' ? rAller : rRetour;
@@ -1758,6 +1759,153 @@ function leaveRide(rideId, prenom) {
   saveToGitHub(false);
 }
 
+// ============================================================
+// HORAIRES D'ÉCOLE
+// L'emploi du temps suit un cycle de deux semaines (A puis B).
+// Chaque enfant porte ses horaires de rentrée et de sortie pour les dix
+// créneaux du cycle ; une exception ponctuelle peut les remplacer un jour
+// donné (professeur absent, journée modifiée).
+// ============================================================
+
+const CRENEAUX_CYCLE = ['Lundi A','Mardi A','Mercredi A','Jeudi A','Vendredi A',
+                        'Lundi B','Mardi B','Mercredi B','Jeudi B','Vendredi B'];
+const LUNDI_SEMAINE_A = new Date(2026, 8, 7); // lundi 7 septembre 2026 = semaine A
+
+// Quel créneau du cycle correspond à cette date ?
+function creneauCycle(dateObj) {
+  if (!dateObj) return null;
+  const dow = dateObj.getDay();
+  if (dow < 1 || dow > 5) return null;
+  const lundi = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate() - (dow - 1));
+  const semaines = Math.round((lundi - LUNDI_SEMAINE_A) / 604800000);
+  const lettre = (((semaines % 2) + 2) % 2) === 0 ? 'A' : 'B';
+  return JOURS_FR[dow] + ' ' + lettre;
+}
+
+// ---- Exceptions ponctuelles ----
+function getExceptions() {
+  try { return JSON.parse(localStorage.getItem('covoit_horaires_exceptions') || '{}'); } catch(e) { return {}; }
+}
+function saveExceptions(ex) {
+  markDirty('horaires');
+  try { localStorage.setItem('covoit_horaires_exceptions', JSON.stringify(ex)); } catch(e) {}
+}
+
+// Horaires effectifs d'un enfant pour un jour donné
+function horairesDuJour(prenom, sheet) {
+  const ex = (getExceptions()[sheet] || {})[prenom];
+  if (ex) return { r: ex.r || '', s: ex.s || '', note: ex.note || '', par: ex.par || '', exception: true };
+  const c = DATA.children.find(x => x.prenom === prenom);
+  const jour = ALL_DAYS.find(d => d.sheet === sheet);
+  const cr = jour ? creneauCycle(jour.dateObj) : null;
+  const h = (c && c.horaires && cr) ? c.horaires[cr] : null;
+  return h ? { r: h.r || '', s: h.s || '', note: '', par: '', exception: false } : null;
+}
+
+// Bandeau horaires affiché dans la fiche enfant
+function horairesBandeauHtml(prenom, sheet) {
+  const h = horairesDuJour(prenom, sheet);
+  const jour = ALL_DAYS.find(d => d.sheet === sheet);
+  const cr = jour ? creneauCycle(jour.dateObj) : '';
+  if (!h) {
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);margin-bottom:6px;">
+      <span>🏫 Horaires non renseignés</span>
+      <button onclick="openHoraireForm('${jsStr(prenom)}','${jsStr(sheet)}')" style="background:rgba(108,99,255,0.15);border:none;color:var(--accent);padding:3px 9px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">Renseigner</button>
+    </div>`;
+  }
+  const couleur = h.exception ? 'var(--accent4)' : 'var(--text-muted)';
+  return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:${couleur};margin-bottom:6px;">
+    <span>🏫 Rentrée <b>${escHtml(h.r || '—')}</b> · Sortie <b>${escHtml(h.s || '—')}</b></span>
+    ${h.exception ? `<span class="badge" style="background:rgba(247,151,30,0.15);color:var(--accent4);">⚠️ modifié${h.note ? ' · ' + escHtml(h.note) : ''}</span>`
+                  : `<span style="opacity:0.6;">${escHtml(cr)}</span>`}
+    <button onclick="openHoraireForm('${jsStr(prenom)}','${jsStr(sheet)}')" style="background:rgba(108,99,255,0.15);border:none;color:var(--accent);padding:3px 9px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✏️ Modifier</button>
+  </div>`;
+}
+
+// ---- Modification ponctuelle ----
+function openHoraireForm(prenom, sheet) {
+  if (!requireIdentity('Identifiez-vous pour modifier un horaire.')) return;
+  const jour = ALL_DAYS.find(d => d.sheet === sheet);
+  const h = horairesDuJour(prenom, sheet) || { r: '', s: '', note: '', exception: false };
+  const enfant = DATA.children.find(c => c.prenom === prenom) || {};
+  const classe = enfant.classe || '';
+  const camarades = DATA.children.filter(c => c.classe && c.classe === classe && c.prenom !== prenom);
+  const opts = (sel) => '<option value="">—</option>' +
+    TIME_OPTIONS.map(t => `<option value="${t}" ${t === sel ? 'selected' : ''}>${t}</option>`).join('');
+
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-size:18px;font-weight:800;">🏫 Horaires de ${escHtml(prenom)}</div>
+      <button onclick="closeAppModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+      ${escHtml(jour ? jour.date : sheet)}${classe ? ' · niveau ' + escHtml(classe) : ''}<br>
+      Professeur absent, journée modifiée : la correction ne vaut que pour ce jour.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><div class="info-label" style="margin-bottom:6px;">Rentrée</div>
+        <select id="h-rentree" class="search-input" style="padding-left:14px;">${opts(h.r)}</select></div>
+      <div><div class="info-label" style="margin-bottom:6px;">Sortie</div>
+        <select id="h-sortie" class="search-input" style="padding-left:14px;">${opts(h.s)}</select></div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="info-label" style="margin-bottom:6px;">Motif (facultatif)</div>
+      <input id="h-note" class="search-input" style="padding-left:14px;" value="${escHtml(h.note || '')}" placeholder="ex : professeur absent">
+    </div>
+    ${camarades.length ? `<label style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px;background:var(--surface2);border-radius:10px;cursor:pointer;font-size:13px;">
+      <input type="checkbox" id="h-classe">
+      <span>Appliquer à tout le niveau ${escHtml(classe)} — ${camarades.length} autre${camarades.length > 1 ? 's' : ''} élève${camarades.length > 1 ? 's' : ''}<br>
+        <span style="font-size:11px;color:var(--text-muted);">Le classeur ne distingue pas les sections : tout le niveau est concerné.</span></span>
+    </label>` : ''}
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      ${h.exception ? `<button onclick="retablirHoraire('${jsStr(prenom)}','${jsStr(sheet)}')" style="flex:1;padding:14px;background:var(--surface2);border:none;border-radius:12px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Rétablir l'habituel</button>` : ''}
+      <button onclick="saveHoraireForm('${jsStr(prenom)}','${jsStr(sheet)}')" style="flex:2;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">💾 Enregistrer</button>
+    </div>`);
+}
+
+function saveHoraireForm(prenom, sheet) {
+  const id = getIdentity();
+  if (!id) return;
+  const r = document.getElementById('h-rentree').value;
+  const s = document.getElementById('h-sortie').value;
+  const note = document.getElementById('h-note').value.trim();
+  if (!r && !s) { alert('Indiquez au moins une heure.'); return; }
+  const toute = document.getElementById('h-classe') && document.getElementById('h-classe').checked;
+
+  if (!isMyChild(prenom) && !toute) {
+    const fam = familiesOfChild(prenom).map(f => f.label).join('/') || 'une autre famille';
+    if (!confirm(prenom + ' est de la famille ' + fam + '. Modifier son horaire quand même ?')) return;
+  }
+
+  const enfant = DATA.children.find(c => c.prenom === prenom) || {};
+  const cibles = toute && enfant.classe
+    ? DATA.children.filter(c => c.classe === enfant.classe).map(c => c.prenom)
+    : [prenom];
+
+  const ex = getExceptions();
+  ex[sheet] = ex[sheet] || {};
+  cibles.forEach(p => { ex[sheet][p] = { r, s, note, par: id.label, le: new Date().toISOString() }; });
+  saveExceptions(ex);
+
+  closeAppModal();
+  showToast('🏫 Horaire modifié' + (cibles.length > 1 ? ' pour ' + cibles.length + ' élèves' : ''));
+  refreshAll();
+  saveToGitHub(false);
+}
+
+function retablirHoraire(prenom, sheet) {
+  const ex = getExceptions();
+  if (ex[sheet]) {
+    delete ex[sheet][prenom];
+    if (!Object.keys(ex[sheet]).length) delete ex[sheet];
+  }
+  saveExceptions(ex);
+  closeAppModal();
+  showToast('Horaire habituel rétabli');
+  refreshAll();
+  saveToGitHub(false);
+}
+
 // ===================== ADMIN MODULE =====================
 let adminUnlocked = true;
 let editingRideId = null;
@@ -1861,6 +2009,7 @@ async function rebaseOnRemote() {
     if (!_modifie.has('drivers') && c.drivers_deleted) localStorage.setItem('covoit_drivers_deleted', JSON.stringify(c.drivers_deleted));
     if (!_modifie.has('driver_children') && c.driver_children) localStorage.setItem('covoit_driver_children', JSON.stringify(c.driver_children));
     if (!_modifie.has('equity_archive') && c.equity_archive) localStorage.setItem('covoit_equity_archive', JSON.stringify(c.equity_archive));
+    if (!_modifie.has('horaires') && c.horaires_exceptions) localStorage.setItem('covoit_horaires_exceptions', JSON.stringify(c.horaires_exceptions));
     if (c.extra_days) registerDays(c.extra_days); // les jours se cumulent, jamais de perte
     return true;
   } catch(e) { console.error('rebaseOnRemote:', e); return false; }
@@ -1878,6 +2027,7 @@ async function saveToGitHub(showMsg, essai) {
       drivers_deleted: JSON.parse(localStorage.getItem('covoit_drivers_deleted') || '[]'),
       extra_days:      extraDaysForSave(),
       equity_archive:  JSON.parse(localStorage.getItem('covoit_equity_archive') || '[]'),
+      horaires_exceptions: getExceptions(),
       last_updated:    new Date().toISOString()
     };
     const body = {
@@ -1925,6 +2075,9 @@ function applyGhData(content) {
   }
   if (content.equity_archive) {
     localStorage.setItem('covoit_equity_archive', JSON.stringify(content.equity_archive));
+  }
+  if (content.horaires_exceptions) {
+    localStorage.setItem('covoit_horaires_exceptions', JSON.stringify(content.horaires_exceptions));
   }
 }
 

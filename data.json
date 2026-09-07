@@ -608,7 +608,49 @@
       "chauffeur1": "Lisa FASSY",
       "tel_chauf1": "0684453371",
       "chauffeur2": "Stephane FASSY",
-      "tel_chauf2": "nan"
+      "tel_chauf2": "nan",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Valentin",
@@ -628,7 +670,49 @@
       "chauffeur1": "Lisa FASSY",
       "tel_chauf1": "0684453371",
       "chauffeur2": "Stephane FASSY",
-      "tel_chauf2": "nan"
+      "tel_chauf2": "nan",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Sophie",
@@ -648,7 +732,49 @@
       "chauffeur1": "Alexandra PEACOCK",
       "tel_chauf1": "0782592320",
       "chauffeur2": "David PEACOCK",
-      "tel_chauf2": "0651468494"
+      "tel_chauf2": "0651468494",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Mila",
@@ -668,7 +794,49 @@
       "chauffeur1": "Rachel ROBINSON",
       "tel_chauf1": "0650349578",
       "chauffeur2": "Esteban LEFEBVRE",
-      "tel_chauf2": "0687746704"
+      "tel_chauf2": "0687746704",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "10h10",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Matilda",
@@ -688,7 +856,49 @@
       "chauffeur1": "Nicolas MOULAERT",
       "tel_chauf1": "0627884141",
       "chauffeur2": "Frances MOULAERT",
-      "tel_chauf2": "0627884141"
+      "tel_chauf2": "0627884141",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Lisa",
@@ -708,7 +918,49 @@
       "chauffeur1": "Alexandra DALMASSO",
       "tel_chauf1": "0614707946",
       "chauffeur2": "Julien DALMASSO",
-      "tel_chauf2": "0622373573"
+      "tel_chauf2": "0622373573",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Camille",
@@ -728,7 +980,49 @@
       "chauffeur1": "Mahé GAUCHEROT",
       "tel_chauf1": "0612310118",
       "chauffeur2": "Guillaume GAUCHEROT",
-      "tel_chauf2": "0658052851"
+      "tel_chauf2": "0658052851",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Olivia",
@@ -748,7 +1042,49 @@
       "chauffeur1": "Lisa FASSY",
       "tel_chauf1": "0684453371",
       "chauffeur2": "Stephane FASSY",
-      "tel_chauf2": "nan"
+      "tel_chauf2": "nan",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Méane",
@@ -768,7 +1104,49 @@
       "chauffeur1": "Delphine LAMARE PERRIN",
       "tel_chauf1": "0668807078",
       "chauffeur2": "nan",
-      "tel_chauf2": "nan"
+      "tel_chauf2": "nan",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h55",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h55",
+          "s": "15h40"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        }
+      }
     },
     {
       "prenom": "Vanille",
@@ -788,7 +1166,49 @@
       "chauffeur1": "Cecile MEGY",
       "tel_chauf1": "0616225831",
       "chauffeur2": "Julien MEGY",
-      "tel_chauf2": "0675980322"
+      "tel_chauf2": "0675980322",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Lundi B": {
+          "r": "8h55",
+          "s": "15h40"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h55",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h55",
+          "s": "14h45"
+        },
+        "Vendredi B": {
+          "r": "10h10",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Noah",
@@ -808,7 +1228,49 @@
       "chauffeur1": "Louise CARSON",
       "tel_chauf1": "0679551488",
       "chauffeur2": "David BRILLANT",
-      "tel_chauf2": "0622730205"
+      "tel_chauf2": "0622730205",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Cesar",
@@ -828,7 +1290,49 @@
       "chauffeur1": "Anne Sophie SAMYN",
       "tel_chauf1": "0786257419",
       "chauffeur2": "Anthony NOWE",
-      "tel_chauf2": "0786212904"
+      "tel_chauf2": "0786212904",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Andy",
@@ -848,7 +1352,49 @@
       "chauffeur1": "Leonie GRANAUD",
       "tel_chauf1": "0629454231",
       "chauffeur2": "Olivier GRANAUD",
-      "tel_chauf2": "0661014731"
+      "tel_chauf2": "0661014731",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Lou",
@@ -868,7 +1414,49 @@
       "chauffeur1": "Leonie GRANAUD",
       "tel_chauf1": "0629454231",
       "chauffeur2": "Olivier GRANAUD",
-      "tel_chauf2": "0661014731"
+      "tel_chauf2": "0661014731",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "10h10",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Manon",
@@ -888,7 +1476,49 @@
       "chauffeur1": "Nathalie SUDRIAL",
       "tel_chauf1": "0673780308",
       "chauffeur2": "Jerome SUDRIAL",
-      "tel_chauf2": "0784484618"
+      "tel_chauf2": "0784484618",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "14h45"
+        }
+      }
     },
     {
       "prenom": "Louis",
@@ -908,7 +1538,49 @@
       "chauffeur1": "Pierre COULON",
       "tel_chauf1": "0786115198",
       "chauffeur2": "Laurie COULON",
-      "tel_chauf2": "0670726826"
+      "tel_chauf2": "0670726826",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "14h45"
+        }
+      }
     },
     {
       "prenom": "Finnian",
@@ -928,7 +1600,49 @@
       "chauffeur1": "Ian WALLACE",
       "tel_chauf1": "0789702568",
       "chauffeur2": "Victoria WALLACE",
-      "tel_chauf2": "0789702325"
+      "tel_chauf2": "0789702325",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Célia",
@@ -948,7 +1662,45 @@
       "chauffeur1": "Nathalie SUDRIAL",
       "tel_chauf1": "0673780308",
       "chauffeur2": "Jerome SUDRIAL",
-      "tel_chauf2": "0784484618"
+      "tel_chauf2": "0784484618",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "14h45"
+        }
+      }
     },
     {
       "prenom": "Oscar",
@@ -968,7 +1720,49 @@
       "chauffeur1": "Nicolas MOULAERT",
       "tel_chauf1": "0627884141",
       "chauffeur2": "Frances MOULAERT",
-      "tel_chauf2": "0627884141"
+      "tel_chauf2": "0627884141",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "16h50"
+        }
+      }
     },
     {
       "prenom": "Côme",
@@ -988,7 +1782,49 @@
       "chauffeur1": "Julien BERTAINA",
       "tel_chauf1": "0625556752",
       "chauffeur2": "Léa GIVET",
-      "tel_chauf2": "0609282659"
+      "tel_chauf2": "0609282659",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "10h10",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "13h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "15h40"
+        }
+      }
     },
     {
       "prenom": "Capucine",
@@ -1008,7 +1844,49 @@
       "chauffeur1": "Marido DEROCHE",
       "tel_chauf1": "0622257216",
       "chauffeur2": "Didier DEROCHE",
-      "tel_chauf2": "0613760986"
+      "tel_chauf2": "0613760986",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": ""
+        },
+        "Lundi B": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h55",
+          "s": ""
+        }
+      }
     },
     {
       "prenom": "Isaac",
@@ -1028,7 +1906,49 @@
       "chauffeur1": "Rachel ROBINSON",
       "tel_chauf1": "0650349578",
       "chauffeur2": "Esteban LEFEBVRE",
-      "tel_chauf2": "0687746704"
+      "tel_chauf2": "0687746704",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "13h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        }
+      }
     },
     {
       "prenom": "Clara",
@@ -1048,7 +1968,49 @@
       "chauffeur1": "Fabienne MCMAHON",
       "tel_chauf1": "0770152962",
       "chauffeur2": "nan",
-      "tel_chauf2": "nan"
+      "tel_chauf2": "nan",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        }
+      }
     },
     {
       "prenom": "Léonie",
@@ -1068,7 +2030,49 @@
       "chauffeur1": "Anne Sophie SAMYN",
       "tel_chauf1": "0786257419",
       "chauffeur2": "Anthony NOWE",
-      "tel_chauf2": "0786212904"
+      "tel_chauf2": "0786212904",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "13h50"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        }
+      }
     },
     {
       "prenom": "Lucie",
@@ -1088,7 +2092,49 @@
       "chauffeur1": "Mahé GAUCHEROT",
       "tel_chauf1": "0658052851",
       "chauffeur2": "Guillaume GAUCHEROT",
-      "tel_chauf2": "0612310118"
+      "tel_chauf2": "0612310118",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "17h45"
+        },
+        "Mardi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "17h45"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        }
+      }
     },
     {
       "prenom": "Nina",
@@ -1108,7 +2154,49 @@
       "chauffeur1": "Cecile MEGY",
       "tel_chauf1": "0616225831",
       "chauffeur2": "Julien MEGY",
-      "tel_chauf2": "0675980322"
+      "tel_chauf2": "0675980322",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "15h40"
+        }
+      }
     },
     {
       "prenom": "Victor",
@@ -1128,7 +2216,49 @@
       "chauffeur1": "Marido DEROCHE",
       "tel_chauf1": "0622257216",
       "chauffeur2": "Didier DEROCHE",
-      "tel_chauf2": "0613760986"
+      "tel_chauf2": "0613760986",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Lundi B": {
+          "r": "8h55",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "11h05"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "14h45"
+        }
+      }
     },
     {
       "prenom": "Virgile",
@@ -1148,7 +2278,49 @@
       "chauffeur1": "Olivier TRONCHON",
       "tel_chauf1": "0630434037",
       "chauffeur2": "Séverine TRONCHON",
-      "tel_chauf2": "0675658103"
+      "tel_chauf2": "0675658103",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "14h45"
+        }
+      }
     },
     {
       "prenom": "Joshua",
@@ -1168,7 +2340,49 @@
       "chauffeur1": "Louise CARSON",
       "tel_chauf1": "0679551488",
       "chauffeur2": "David BRILLANT",
-      "tel_chauf2": "0622730205"
+      "tel_chauf2": "0622730205",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "17h45"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h55",
+          "s": "17h45"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "17h45"
+        }
+      }
     },
     {
       "prenom": "Lucas",
@@ -1188,7 +2402,49 @@
       "chauffeur1": "Michon SWEET",
       "tel_chauf1": "0781882532",
       "chauffeur2": "nan",
-      "tel_chauf2": "nan"
+      "tel_chauf2": "nan",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h55",
+          "s": "11h05"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "15h40"
+        }
+      }
     },
     {
       "prenom": "Térence",
@@ -1208,7 +2464,49 @@
       "chauffeur1": "Marika MASSOUTIER",
       "tel_chauf1": "0621207920",
       "chauffeur2": "Frederic MASSOUTIER",
-      "tel_chauf2": "0614335130"
+      "tel_chauf2": "0614335130",
+      "horaires": {
+        "Lundi A": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mardi A": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi A": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi A": {
+          "r": "8h00",
+          "s": "12h55"
+        },
+        "Vendredi A": {
+          "r": "8h00",
+          "s": "15h40"
+        },
+        "Lundi B": {
+          "r": "8h00",
+          "s": "14h45"
+        },
+        "Mardi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Mercredi B": {
+          "r": "8h00",
+          "s": "12h00"
+        },
+        "Jeudi B": {
+          "r": "8h00",
+          "s": "16h50"
+        },
+        "Vendredi B": {
+          "r": "8h00",
+          "s": "15h40"
+        }
+      }
     }
   ],
   "drivers": [
@@ -2488,5 +3786,6 @@
     }
   ],
   "equity_archive": [],
-  "last_updated": "2026-09-06T15:29:41.989Z"
+  "last_updated": "2026-09-06T15:29:41.989Z",
+  "horaires_exceptions": {}
 }
