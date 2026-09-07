@@ -3785,7 +3785,81 @@
       "dateObj": "2026-10-02T00:00:00.000Z"
     }
   ],
-  "equity_archive": [],
-  "last_updated": "2026-09-06T15:29:41.989Z",
-  "horaires_exceptions": {}
+  "equity_archive": [
+    {
+      "id": "8m1h4exwh5r6",
+      "sheet": "2026-09-07",
+      "chauffeur": "Mahé GAUCHEROT",
+      "enfants": [
+        "Camille",
+        "Olivia",
+        "Noah",
+        "Finnian"
+      ],
+      "places": 4,
+      "date": "2026-09-06T22:00:00.000Z"
+    },
+    {
+      "id": "a32hd2ujc3xc",
+      "sheet": "2026-09-07",
+      "chauffeur": "Marido DEROCHE",
+      "enfants": [
+        "Lucie",
+        "Victor",
+        "Virgile",
+        "Joshua"
+      ],
+      "places": 4,
+      "date": "2026-09-06T22:00:00.000Z"
+    },
+    {
+      "id": "m78uxh8f5zio",
+      "sheet": "2026-09-07",
+      "chauffeur": "Alexandra PEACOCK",
+      "enfants": [
+        "Gabriel",
+        "Valentin",
+        "Sophie"
+      ],
+      "places": 3,
+      "date": "2026-09-06T22:00:00.000Z"
+    },
+    {
+      "id": "1qjc3z7vc746",
+      "sheet": "2026-09-07",
+      "chauffeur": "Lisa FASSY",
+      "enfants": [
+        "Gabriel",
+        "Valentin",
+        "Sophie",
+        "Olivia"
+      ],
+      "places": 4,
+      "date": "2026-09-06T22:00:00.000Z"
+    },
+    {
+      "id": "ym1h4qcx0iw8",
+      "sheet": "2026-09-07",
+      "chauffeur": "Louise CARSON",
+      "enfants": [
+        "Virgile",
+        "Joshua",
+        "Lucas"
+      ],
+      "places": 4,
+      "date": "2026-09-06T22:00:00.000Z"
+    },
+    {
+      "id": "pq6oka753xrj",
+      "sheet": "2026-09-07",
+      "chauffeur": "Mahé GAUCHEROT",
+      "enfants": [
+        "Lucie"
+      ],
+      "places": 4,
+      "date": "2026-09-06T22:00:00.000Z"
+    }
+  ],
+  "horaires_exceptions": {},
+  "last_updated": "2026-09-07T19:00:11.180Z"
 }
