@@ -1174,7 +1174,7 @@ function renderPlanning(sheet, dateLabel) {
   let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
       <div style="font-size:15px;font-weight:700;flex:1;">${escHtml(dateLabel)}</div>
     </div>
-    <button onclick="openProposeRide('${jsStr(sheet)}')" style="width:100%;padding:13px;margin-bottom:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">🚗 Je propose un trajet</button>`;
+    ${isEnfant() ? '' : `<button onclick="openProposeRide('${jsStr(sheet)}')" style="width:100%;padding:13px;margin-bottom:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">🚗 Je propose un trajet</button>`}`;
 
   if (!rides.length) {
     html += '<div class="empty"><div class="empty-emoji">🗓️</div><div class="empty-text">Aucun trajet proposé ce jour</div></div>';
@@ -1309,24 +1309,37 @@ function familiesOfChild(prenom, fams) {
   return Object.values(fams || buildFamilies()).filter(f => f.enfants.includes(prenom));
 }
 
-// Retrouve la famille correspondant à un email ou un numéro de téléphone
+// Retrouve qui se cache derrière un email ou un numéro de téléphone.
+// Les coordonnées propres à un enfant l'identifient LUI, pas ses parents.
 function resolveIdentity(input) {
   const raw = String(input || '').trim();
   if (!raw) return null;
   const fams = buildFamilies();
   const email = normEmail(raw), tel = normTel(raw);
 
+  const enfant = DATA.children.find(c => isEmail(raw)
+    ? (normEmail(c.email) && normEmail(c.email) === email)
+    : (tel.length >= 9 && normTel(c.tel) === tel));
+  if (enfant) {
+    const f = Object.values(fams).find(x => x.enfants.includes(enfant.prenom));
+    return { type: 'enfant', prenom: enfant.prenom,
+             famId: f ? f.id : enfant.prenom.toUpperCase(),
+             label: f ? f.label : (enfant.nom || enfant.prenom),
+             enfants: f ? f.enfants : [enfant.prenom], parents: f ? f.parents : [],
+             via: isEmail(raw) ? 'email' : 'tel', input: isEmail(raw) ? email : tel };
+  }
+
   if (isEmail(raw)) {
     const f = Object.values(fams).find(x => x.emails.includes(email));
-    return f ? { famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'email', input: email } : null;
+    return f ? { type: 'parent', famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'email', input: email } : null;
   }
   if (tel.length >= 9) {
     const f = Object.values(fams).find(x => x.tels.includes(tel));
-    return f ? { famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'tel', input: tel } : null;
+    return f ? { type: 'parent', famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'tel', input: tel } : null;
   }
   // Repli : nom d'un conducteur (compatibilité avec l'ancienne identification)
   const f = Object.values(fams).find(x => x.parents.some(p => normName(p) === normName(raw)));
-  return f ? { famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'nom', input: raw } : null;
+  return f ? { type: 'parent', famId: f.id, label: f.label, enfants: f.enfants, parents: f.parents, via: 'nom', input: raw } : null;
 }
 
 function getIdentity() {
@@ -1356,6 +1369,9 @@ function setIdentity(id) {
   updateMeBadge();
 }
 function isIdentified() { return !!getIdentity(); }
+// L'utilisateur est-il un élève ? Il ne gère alors que lui et sa fratrie.
+function isEnfant() { const i = getIdentity(); return !!i && i.type === 'enfant'; }
+function monNom() { const i = getIdentity(); return i ? (i.type === 'enfant' ? i.prenom : (i.who || i.label)) : ''; }
 
 // Nom du conducteur à pré-sélectionner
 function getMe() {
@@ -1390,11 +1406,13 @@ function allDriverNames() {
 }
 
 function updateMeBadge() {
+  const btnDrv = document.querySelector('#driver-select-view > button');
+  if (btnDrv) { try { btnDrv.style.display = isEnfant() ? 'none' : ''; } catch(e) {} }
   const el = document.getElementById('me-badge');
   if (!el) return;
   let id = null;
   try { id = getIdentity(); } catch(e) {}
-  el.textContent = id ? '👪 ' + id.label : '👤 S\'identifier';
+  el.textContent = id ? (id.type === 'enfant' ? '🎒 ' + id.prenom : '👪 ' + id.label) : '👤 S\'identifier';
 }
 
 // Demande l'identification ; renvoie false si l'utilisateur n'est pas identifié
@@ -1413,10 +1431,11 @@ function openIdentity(motif) {
     </div>
     <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
       ${motif ? escHtml(motif) + '<br>' : ''}
-      Entrez l'adresse mail d'un parent ou de l'enfant. Le numéro de téléphone déjà enregistré fonctionne aussi.
+      Entrez votre adresse mail ou votre numéro de téléphone.<br>
+      Parents comme élèves : chacun ses propres coordonnées.
     </div>
     ${id ? `<div class="ride-card" style="margin-bottom:14px;">
-      <div style="font-size:13px;font-weight:700;">Famille ${escHtml(id.label)}</div>
+      <div style="font-size:13px;font-weight:700;">${id.type === 'enfant' ? '🎒 ' + escHtml(id.prenom) + ' — famille ' + escHtml(id.label) : 'Famille ' + escHtml(id.label)}</div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${(id.enfants||[]).map(escHtml).join(' · ') || 'aucun enfant rattaché'}</div>
     </div>` : ''}
     <input id="ident-input" class="search-input" style="padding-left:14px;" placeholder="mon.mail@exemple.fr ou 0612345678" value="${escHtml(id ? id.input || '' : '')}">
@@ -1437,11 +1456,18 @@ function submitIdentity() {
     msg.innerHTML = '<span style="color:#ff6584;">Adresse ou numéro inconnu. Vérifiez la saisie, ou demandez à l\'administrateur d\'enregistrer votre adresse dans votre fiche.</span>';
     return;
   }
+  if (r.type === 'enfant') {
+    setIdentity({ type: 'enfant', prenom: r.prenom, famId: r.famId, who: r.prenom, via: r.via, input: r.input });
+    closeAppModal();
+    refreshAll();
+    showToast('🎒 Bonjour ' + r.prenom + ' !');
+    return;
+  }
   const who = (r.parents || []).find(p => {
     const d = getDriversData().find(x => x.nom === p);
     return d && (normEmail(d.email) === r.input || normTel(d.tel) === r.input);
   }) || (r.parents || [])[0] || '';
-  setIdentity({ famId: r.famId, who, via: r.via, input: r.input });
+  setIdentity({ type: 'parent', famId: r.famId, who, via: r.via, input: r.input });
   closeAppModal();
   refreshAll();
   showToast('👪 Famille ' + r.label + (r.enfants.length ? ' · ' + r.enfants.join(', ') : ''));
@@ -1472,6 +1498,7 @@ function closeAppModal() {
 function openProposeRide(sheet) {
   if (!DAYS.length) { showToast('Aucun jour disponible'); return; }
   if (!requireIdentity('Identifiez-vous pour proposer un trajet.')) return;
+  if (isEnfant()) { alert('Seuls les parents proposent un trajet.\nDemande à un adulte de ta famille.'); return; }
   const defDay = DAYS.find(d => d.sheet === sheet) || getDefaultDay() || DAYS[0];
   const me = getMe();
   const id = getIdentity();
@@ -1647,6 +1674,7 @@ function openJoinRide(rideId) {
   if (!requireIdentity('Identifiez-vous pour inscrire un enfant.')) return;
 
   const day = ALL_DAYS.find(d => d.sheet === r.sheet);
+  const eleve = isEnfant();
   const cap = getCapacityInfo(r);
   const taken = childrenTakenThatDay(r.sheet, r.direction, r.id);
   const dispo = c => !taken.has(c) && !r.enfants.includes(c);
@@ -1668,7 +1696,7 @@ function openJoinRide(rideId) {
 
   openModal(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <div style="font-size:18px;font-weight:800;">👶 Inscrire un enfant</div>
+      <div style="font-size:18px;font-weight:800;">${eleve ? '🎒 Monter dans cette voiture' : '👶 Inscrire un enfant'}</div>
       <button onclick="closeAppModal()" style="background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
     </div>
 
@@ -1685,18 +1713,18 @@ function openJoinRide(rideId) {
     </div>
 
     ${cap.free <= 0 ? '<div style="padding:12px;background:rgba(255,101,132,0.12);border:1px solid rgba(255,101,132,0.4);border-radius:10px;color:#ff6584;font-size:13px;font-weight:600;text-align:center;">Voiture complète — retirez un passager pour libérer une place.</div>' : `
-      ${mine.length ? `<div class="info-label" style="margin-bottom:6px;">Mes enfants</div>
+      ${mine.length ? `<div class="info-label" style="margin-bottom:6px;">${eleve ? 'Moi et ma fratrie' : 'Mes enfants'}</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
           ${mine.map(c => `<button onclick="joinRide('${jsStr(r.id)}','${jsStr(c)}')" style="padding:9px 14px;background:rgba(67,233,123,0.14);border:1px solid rgba(67,233,123,0.35);border-radius:10px;color:var(--accent3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">+ ${escHtml(childLabel(c))}</button>`).join('')}
-        </div>` : '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Aucun enfant de votre famille disponible pour ce trajet.</div>'}
+        </div>` : `<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">${eleve ? 'Toi et ta fratrie êtes déjà placés pour ce trajet.' : 'Aucun enfant de votre famille disponible pour ce trajet.'}</div>`}
 
-      <div class="info-label" style="margin-bottom:6px;">Dépanner une autre famille</div>
+      ${eleve ? '' : `<div class="info-label" style="margin-bottom:6px;">Dépanner une autre famille</div>
       <select id="join-child" class="search-input" style="padding-left:14px;">
         <option value="">— Sélectionner un enfant —</option>
         ${others.map(c => `<option value="${escHtml(c)}">${escHtml(childLabel(c))}</option>`).join('')}
       </select>
       <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Votre nom de famille sera indiqué à côté de l'enfant.</div>
-      <button onclick="joinRide('${jsStr(r.id)}', document.getElementById('join-child').value)" style="width:100%;margin-top:12px;padding:14px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">✅ Ajouter au trajet</button>`}
+      <button onclick="joinRide('${jsStr(r.id)}', document.getElementById('join-child').value)" style="width:100%;margin-top:12px;padding:14px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:12px;color:white;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">✅ Ajouter au trajet</button>`}`}
 
     ${taken.size ? `<div style="margin-top:14px;font-size:11px;color:var(--text-muted);">🔒 Les enfants déjà placés dans un autre trajet ce jour-là ne sont pas proposés.</div>` : ''}
   `);
@@ -1713,6 +1741,7 @@ function joinRide(rideId, prenom) {
 
   const id = getIdentity();
   if (!isMyChild(prenom)) {
+    if (isEnfant()) { alert('Tu ne peux inscrire que toi-même, tes frères et tes sœurs.'); return; }
     const fam = familiesOfChild(prenom).map(f => f.label).join('/') || 'une autre famille';
     if (!confirm(prenom + ' est de la famille ' + fam + '.\nL\'inscrire quand même ? Votre nom sera indiqué à côté.')) return;
   }
@@ -1729,7 +1758,7 @@ function joinRide(rideId, prenom) {
   markDirty('rides');
   r.enfants.push(prenom);
   r.ajouts = r.ajouts || {};
-  r.ajouts[prenom] = { par: id.label, qui: id.who || '', le: new Date().toISOString() };
+  r.ajouts[prenom] = { par: id.label, qui: monNom(), le: new Date().toISOString() };
 
   saveData();
   showToast('✅ ' + prenom + ' est inscrit !');
@@ -1745,6 +1774,7 @@ function leaveRide(rideId, prenom) {
   const id = getIdentity();
   const inscritParMoi = ((r.ajouts || {})[prenom] || {}).par === id.label;
   if (!isMyChild(prenom) && !inscritParMoi) {
+    if (isEnfant()) { alert('Tu ne peux retirer que toi-même, tes frères et tes sœurs.'); return; }
     const fam = familiesOfChild(prenom).map(f => f.label).join('/') || 'une autre famille';
     if (!confirm(prenom + ' est de la famille ' + fam + ' et n\'a pas été inscrit par vous.\nLe retirer quand même ?')) return;
   } else if (!confirm('Retirer ' + prenom + ' de ce trajet ?')) return;
@@ -1865,6 +1895,7 @@ function saveHoraireForm(prenom, sheet) {
   const note = document.getElementById('h-note').value.trim();
   if (!r && !s) { alert('Indiquez au moins une heure.'); return; }
   if (!isMyChild(prenom)) {
+    if (isEnfant()) { alert('Tu ne peux corriger que tes horaires et ceux de tes frères et sœurs.'); return; }
     const fam = familiesOfChild(prenom).map(f => f.label).join('/') || 'une autre famille';
     if (!confirm(prenom + ' est de la famille ' + fam + '. Modifier son horaire quand même ?')) return;
   }
@@ -1872,7 +1903,7 @@ function saveHoraireForm(prenom, sheet) {
   // Une correction ne vaut que pour cet élève, jamais pour un groupe
   const ex = getExceptions();
   ex[sheet] = ex[sheet] || {};
-  ex[sheet][prenom] = { r, s, note, par: id.label, le: new Date().toISOString() };
+  ex[sheet][prenom] = { r, s, note, par: id.label, qui: monNom(), le: new Date().toISOString() };
   saveExceptions(ex);
 
   closeAppModal();
