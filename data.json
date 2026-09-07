@@ -3860,6 +3860,17 @@
       "date": "2026-09-06T22:00:00.000Z"
     }
   ],
-  "horaires_exceptions": {},
-  "last_updated": "2026-09-07T19:00:11.180Z"
+  "horaires_exceptions": {
+    "2026-09-14": {
+      "Camille": {
+        "r": "8h00",
+        "s": "13h50",
+        "note": "",
+        "par": "GAUCHEROT",
+        "qui": "Mahé GAUCHEROT",
+        "le": "2026-09-07T19:01:18.037Z"
+      }
+    }
+  },
+  "last_updated": "2026-09-07T19:01:18.882Z"
 }
