@@ -836,6 +836,13 @@ function initDriverSelect() {
   const sel = document.getElementById('driver-select');
   const cur = sel.value;
   while (sel.options.length > 1) sel.remove(1);
+  const id = getIdentity();
+  if (id && (id.parents || []).length) {
+    const o = document.createElement('option');
+    o.value = '__famille__';
+    o.textContent = '👪 Ma famille — ' + id.parents.join(' + ');
+    sel.appendChild(o);
+  }
   const drivers = allDriverNames(); // tous les conducteurs connus, pas seulement ceux qui roulent cette semaine
   drivers.forEach(d => {
     const opt = document.createElement('option');
@@ -843,11 +850,14 @@ function initDriverSelect() {
     opt.textContent = d;
     sel.appendChild(opt);
   });
-  if (cur && drivers.includes(cur)) sel.value = cur;
+  if (cur && (drivers.includes(cur) || cur === '__famille__')) sel.value = cur;
+  else if (id && (id.parents || []).length) sel.value = '__famille__';
+  loadDriverRides(sel.value);
 }
 
 function loadDriverRides(driver) {
   const container = document.getElementById('driver-rides');
+  if (driver === '__famille__') { renderFamilyAgenda(); return; }
   if (!driver) { container.innerHTML = ''; return; }
   
   const parseHeure = h => { if (!h) return 9999; const m = h.replace(/[h:]/,':').match(/(\d+):?(\d*)/); return m ? parseInt(m[1])*60+(parseInt(m[2])||0) : 9999; };
@@ -891,6 +901,61 @@ function loadDriverRides(driver) {
     if (!byDay[d.sheet]) return;
     html += `<div class="section-title">${d.date}</div>`;
     sortRides(byDay[d.sheet]).forEach(r => { html += rideCardHtml(r, false); });
+  });
+
+  container.innerHTML = html;
+}
+
+// Agenda de la famille : ce que nous conduisons et où voyagent nos enfants,
+// tous parents confondus, sans avoir à sélectionner chaque conducteur.
+function renderFamilyAgenda() {
+  const container = document.getElementById('driver-rides');
+  if (!container) return;
+  const id = getIdentity();
+  if (!id) { container.innerHTML = ''; return; }
+
+  const parents = id.parents || [];
+  const miens   = myChildren();
+  const visibles = new Set(DAYS.map(d => d.sheet));
+  const conduits = DATA.rides.filter(r => visibles.has(r.sheet) && parents.includes(r.chauffeur));
+  const ailleurs = DATA.rides.filter(r => visibles.has(r.sheet) && !parents.includes(r.chauffeur)
+                                       && r.enfants.some(e => miens.includes(e)));
+
+  const placesOffertes = conduits.reduce((n, r) => n + r.enfants.filter(e => !miens.includes(e)).length, 0);
+  const placesPrises   = ailleurs.reduce((n, r) => n + r.enfants.filter(e => miens.includes(e)).length, 0);
+
+  let html = `
+    <div class="info-block" style="margin-bottom:14px;">
+      <div class="info-icon" style="background:rgba(108,99,255,0.15);">👪</div>
+      <div>
+        <div class="info-label">Agenda de la famille ${escHtml(id.label)}</div>
+        <div class="info-value">${conduits.length} trajet${conduits.length > 1 ? 's' : ''} conduit${conduits.length > 1 ? 's' : ''} · ${placesOffertes} place${placesOffertes > 1 ? 's' : ''} offerte${placesOffertes > 1 ? 's' : ''} · ${placesPrises} prise${placesPrises > 1 ? 's' : ''} ailleurs</div>
+        ${parents.length ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${parents.map(escHtml).join(' · ')}</div>` : ''}
+      </div>
+    </div>`;
+
+  if (!conduits.length && !ailleurs.length) {
+    html += '<div class="empty"><div class="empty-emoji">🗓️</div><div class="empty-text">Rien de prévu pour votre famille</div></div>';
+    container.innerHTML = html;
+    return;
+  }
+
+  const ph = h => { if (!h) return 9999; const m = (h+'').replace('h',':').match(/(\d+):?(\d*)/); return m ? parseInt(m[1])*60+(parseInt(m[2])||0) : 9999; };
+  const tri = arr => arr.slice().sort((a, b) => (a.direction === b.direction ? 0 : a.direction === 'ALLER' ? -1 : 1) || ph(a.heure) - ph(b.heure));
+
+  DAYS.forEach(d => {
+    const c = tri(conduits.filter(r => r.sheet === d.sheet));
+    const a = tri(ailleurs.filter(r => r.sheet === d.sheet));
+    if (!c.length && !a.length) return;
+    html += `<div class="section-title">${escHtml(d.date)}${isToday(d) ? ' · aujourd\'hui' : ''}</div>`;
+    if (c.length) {
+      html += `<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.5px;margin:6px 0;">🚗 Nous conduisons</div>`;
+      c.forEach(r => { html += rideCardHtml(r, true); });
+    }
+    if (a.length) {
+      html += `<div style="font-size:11px;font-weight:700;color:var(--accent4);text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🧒 Nos enfants avec une autre famille</div>`;
+      a.forEach(r => { html += rideCardHtml(r, true); });
+    }
   });
 
   container.innerHTML = html;
@@ -3346,12 +3411,7 @@ function showToast(msg) {
 // Refresh other views after data changes
 function refreshAll() {
   // Refresh driver select
-  const dSel = document.getElementById('driver-select');
-  const curDriver = dSel.value;
-  while (dSel.options.length > 1) dSel.remove(1);
-  const drivers = allDriverNames();
-  drivers.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; dSel.appendChild(o); });
-  if (curDriver) { dSel.value = curDriver; loadDriverRides(curDriver); }
+  initDriverSelect();
 
   // Refresh child select
   const cSel = document.getElementById('child-select');
